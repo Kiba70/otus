@@ -10,8 +10,8 @@ const (
 )
 
 type (
-	Storage struct {
-		elem         []any
+	Storage[T any] struct {
+		elem         []T
 		headPoint    int
 		countSeconds int
 
@@ -19,7 +19,7 @@ type (
 	}
 )
 
-func New(seconds ...int) *Storage {
+func New[T any](seconds ...int) *Storage[T] {
 	countSeconds := defaultCountSeconds // Размер буфера по умолчанию
 
 	switch {
@@ -29,8 +29,8 @@ func New(seconds ...int) *Storage {
 		countSeconds = seconds[0]
 	}
 
-	result := &Storage{
-		elem:         make([]any, 0, countSeconds),
+	result := &Storage[T]{
+		elem:         make([]T, 0, countSeconds),
 		headPoint:    0,
 		countSeconds: countSeconds,
 	}
@@ -38,7 +38,7 @@ func New(seconds ...int) *Storage {
 	return result
 }
 
-func (s *Storage) Add(elem any) {
+func (s *Storage[T]) Add(elem T) {
 	s.Lock()
 	defer s.Unlock()
 
@@ -55,7 +55,7 @@ func (s *Storage) Add(elem any) {
 	}
 }
 
-func (s *Storage) Get(m int) []any {
+func (s *Storage[T]) Get(m int) []T {
 	s.RLock()
 	defer s.RUnlock()
 
@@ -63,7 +63,7 @@ func (s *Storage) Get(m int) []any {
 		return nil // Буфер с данными не заполнен
 	}
 
-	result := make([]any, m)
+	result := make([]T, m)
 
 	if s.headPoint-m >= 0 { // Попадаем в 1 слайс
 		ncopy := copy(result, s.elem[s.headPoint-m:])

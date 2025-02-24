@@ -1,7 +1,6 @@
 package storage_test
 
 import (
-	"fmt"
 	"otus/internal/storage"
 	"testing"
 
@@ -9,33 +8,30 @@ import (
 )
 
 var (
-	s *storage.Storage
+	s *storage.Storage[int]
 )
 
 func TestStorage(t *testing.T) {
 	t.Run("Creating storage", func(t *testing.T) {
-		s = storage.New(10)
+		s = storage.New[int](10)
 		require.NotNil(t, s)
+	})
 
+	t.Run("Adding data", func(t *testing.T) {
 		for i := 0; i < 15; i++ {
 			s.Add(i)
 		}
-
-		g := s.Get(15)
-		fmt.Println("G:", g[0].(int))
-		require.NotNil(t, g)
-		require.Equal(t, len(g), 15)
 	})
 
-	// t.Run("Adding data", func(t *testing.T) {
-	// for i := 0; i < 15; i++ {
-	// 	s.Add(i)
-	// }
-	// })
+	t.Run("Get 10 elements with len buffer 10", func(t *testing.T) {
+		g := s.Get(10)
+		require.NotNil(t, g)
+		require.Equal(t, 10, len(g))
+	})
 
-	// t.Run("Get 5 elements", func(t *testing.T) {
-	// 	g := s.Get(5)
-	// 	fmt.Println("G:", g)
-	// 	require.Equal(t, len(g), 5)
-	// })
+	t.Run("Get 15 elements with len buffer 10", func(t *testing.T) {
+		g := s.Get(15)
+		require.Nil(t, g)
+		require.Equal(t, 0, len(g))
+	})
 }

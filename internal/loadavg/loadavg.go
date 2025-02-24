@@ -15,7 +15,7 @@ type (
 )
 
 func Start() error {
-	s := storage.New()
+	s := storage.New[statistic]()
 	_ = s
 	return nil
 }
