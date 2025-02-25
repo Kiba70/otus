@@ -53,6 +53,8 @@ func (s *Storage[T]) Add(elem T) {
 	if s.headPoint == s.countSeconds {
 		s.headPoint = 0
 	}
+
+	// slog.Debug("Storage", "Add", elem)
 }
 
 func (s *Storage[T]) Get(m int) []T {
