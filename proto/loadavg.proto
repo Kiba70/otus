@@ -2,3 +2,19 @@ syntax = "proto3";
 
 package web;
 
+ption go_package = "otus/internal/web/grpc";
+
+service LoadAvg {
+    rpc LoadAvgGetMon (LoadAvgRequest) returns (LoadAvgReply) {}
+}
+
+message LoadAvgRequest {
+    int32 period = 1;
+    int32 seconds = 2;
+}
+
+message LoadAvgReply {
+    float one = 1;
+    float five =2;
+    float fifteen = 3;
+}
