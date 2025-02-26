@@ -5,7 +5,7 @@ package web;
 option go_package = "otus/internal/web/grpc";
 
 service LoadAvg {
-    rpc LoadAvgGetMon (LoadAvgRequest) returns (LoadAvgReply) {}
+    rpc LoadAvgGetMon (LoadAvgRequest) returns (stream LoadAvgReply) {}
 }
 
 message LoadAvgRequest {
