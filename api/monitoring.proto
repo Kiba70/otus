@@ -1,8 +1,7 @@
 syntax = "proto3";
 
-package web;
-
-option go_package = "otus/internal/web/grpc";
+package pb;
+option go_package = "./;pb";
 
 service LoadAvg {
     rpc LoadAvgGetMon (LoadAvgRequest) returns (stream LoadAvgReply) {}

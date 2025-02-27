@@ -2,8 +2,10 @@ package main
 
 import (
 	"log/slog"
+	"otus/internal/config"
 	"otus/internal/loadavg"
 	"otus/internal/process"
+	"otus/internal/web"
 	"sync"
 )
 
@@ -14,7 +16,21 @@ func main() {
 	ctx, cancel := process.Start()
 	defer cancel()
 
-	loadavg.Start(ctx, wgGlobal)
+	if err := config.Start(); err != nil {
+		slog.Error("Config start error", "erroe", err)
+		return
+	}
+
+	if err := loadavg.Start(ctx, wgGlobal); err != nil {
+		slog.Error("LoadAvg start error", "erroe", err)
+		return
+	}
+
+	if err := web.Start(ctx, wgGlobal); err != nil {
+		slog.Error("WEB start error", "erroe", err)
+		process.Stop()
+		return
+	}
 
 	wgGlobal.Wait() // Ждём всех
 }
