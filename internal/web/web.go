@@ -26,7 +26,7 @@ type server struct {
 }
 
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
-	ctxW, _ = context.WithCancel(ctx)
+	ctxW = context.WithoutCancel(ctx)
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *config.Port))
 	if err != nil {
