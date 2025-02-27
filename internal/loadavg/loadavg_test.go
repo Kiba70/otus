@@ -24,9 +24,9 @@ func TestParser(t *testing.T) {
 		g, err := GetAvg(100)
 		require.Nil(t, err)
 		require.Equal(t, AvgStat{
-			one:     0.16,
-			five:    0.21,
-			fifteen: 0.21,
+			One:     0.16,
+			Five:    0.21,
+			Fifteen: 0.21,
 		}, g)
 
 		close(chToParser)

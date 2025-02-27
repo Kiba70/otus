@@ -2,10 +2,10 @@ package loadavg
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"log/slog"
 	"os"
+	"otus/internal/myerr"
 	"otus/internal/process"
 	"otus/internal/storage"
 	"sync"
@@ -20,14 +20,13 @@ const (
 var (
 	dataMon    *storage.Storage[AvgStat]
 	chToParser = make(chan []byte, chSize)
-	ErrEmpty   = errors.New("Empty data")
 )
 
 type (
 	AvgStat struct {
-		one     float32
-		five    float32
-		fifteen float32
+		One     float32
+		Five    float32
+		Fifteen float32
 	}
 )
 
@@ -81,7 +80,7 @@ func parser() {
 	for data := range chToParser {
 		var s AvgStat
 
-		_, err := fmt.Sscanf(string(data), "%f %f %f", &s.one, &s.five, &s.fifteen)
+		_, err := fmt.Sscanf(string(data), "%f %f %f", &s.One, &s.Five, &s.Fifteen)
 		if err != nil {
 			slog.Error("Load AVG", "sscanf error", err)
 		}
@@ -95,18 +94,18 @@ func GetAvg(m int) (AvgStat, error) {
 
 	data := dataMon.Get(m)
 	if data == nil {
-		return result, ErrEmpty
+		return result, myerr.ErrEmpty
 	}
 
 	for i, r = range data {
-		result.one += r.one
-		result.five += r.five
-		result.fifteen += r.fifteen
+		result.One += r.One
+		result.Five += r.Five
+		result.Fifteen += r.Fifteen
 	}
 
-	result.one = float32(int(result.one*100)/i) / 100 // Обрезаем 2 знака после запятой
-	result.five = float32(int(result.five*100)/i) / 100
-	result.fifteen = float32(int(result.fifteen*100)/i) / 100
+	result.One = float32(int(result.One*100)/i) / 100 // Обрезаем 2 знака после запятой
+	result.Five = float32(int(result.Five*100)/i) / 100
+	result.Fifteen = float32(int(result.Fifteen*100)/i) / 100
 
 	return result, nil
 }
