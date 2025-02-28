@@ -68,7 +68,7 @@ func (s *Storage[T]) Get(m int) []T {
 	result := make([]T, m)
 
 	if s.headPoint-m >= 0 { // Попадаем в 1 слайс
-		ncopy := copy(result, s.elem[s.headPoint-m:])
+		ncopy := copy(result, s.elem[s.headPoint-m:s.headPoint])
 		slog.Debug("Storage copy", "num copyed", ncopy)
 		return result
 	}

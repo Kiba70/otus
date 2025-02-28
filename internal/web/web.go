@@ -86,3 +86,4 @@ func (s *server) LoadAvgGetMon(in *pb.LoadAvgRequest, out pb.LoadAvg_LoadAvgGetM
 		}
 	}
 }
+
