@@ -3,11 +3,12 @@ syntax = "proto3";
 package pb;
 option go_package = "./;pb";
 
-service LoadAvg {
-    rpc LoadAvgGetMon (LoadAvgRequest) returns (stream LoadAvgReply) {}
+service Monitoring {
+    rpc LoadAvgGetMon (Request) returns (stream LoadAvgReply) {}
+    rpc CpuGetMon (Request) returns (stream CpuReply) {}
 }
 
-message LoadAvgRequest {
+message Request {
     int32 period = 1;
     int32 seconds = 2;
 }
@@ -16,4 +17,10 @@ message LoadAvgReply {
     float one = 1;
     float five =2;
     float fifteen = 3;
+}
+
+message CpuReply {
+    float user = 1;
+    float system =2;
+    float idle = 3;
 }

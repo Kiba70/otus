@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"otus/internal/config"
+	"otus/internal/cpu"
 	"otus/internal/loadavg"
 	"otus/internal/myerr"
 	"otus/internal/pb"
@@ -22,11 +23,11 @@ var (
 )
 
 type server struct {
-	pb.UnimplementedLoadAvgServer
+	pb.UnimplementedMonitoringServer
 }
 
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
-	ctxW = context.WithoutCancel(ctx)
+	ctxW = ctx
 
 	lis, err := net.Listen("tcp", fmt.Sprintf(":%d", *config.Port))
 	if err != nil {
@@ -36,16 +37,17 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 	s := grpc.NewServer()
 
 	// loadavg
-	pb.RegisterLoadAvgServer(s, new(server))
+	pb.RegisterMonitoringServer(s, new(server))
 
 	wgGlobal.Add(1)
 	go func() {
 		defer wgGlobal.Done()
 
 		if err := s.Serve(lis); err != nil {
-			slog.Error("GRPC failed to serve loadavg", "error", err)
+			slog.Error("GRPC failed to serve monitoring", "error", err)
 			process.Stop()
 		}
+		slog.DebugContext(ctxW, "Завершение WEB сервера")
 	}()
 
 	// Gracefull shutdown
@@ -57,7 +59,11 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 	return nil
 }
 
-func (s *server) LoadAvgGetMon(in *pb.LoadAvgRequest, out pb.LoadAvg_LoadAvgGetMonServer) error {
+func (s *server) LoadAvgGetMon(in *pb.Request, out pb.Monitoring_LoadAvgGetMonServer) error {
+	if !loadavg.Working.Load() {
+		return myerr.ErrNotWork
+	}
+
 	seconds := in.GetSeconds()
 
 	t := time.NewTicker(time.Duration(in.GetPeriod()) * time.Second)
@@ -87,3 +93,36 @@ func (s *server) LoadAvgGetMon(in *pb.LoadAvgRequest, out pb.LoadAvg_LoadAvgGetM
 	}
 }
 
+func (s *server) CpuGetMon(in *pb.Request, out pb.Monitoring_CpuGetMonServer) error {
+	if !cpu.Working.Load() {
+		return myerr.ErrNotWork
+	}
+
+	seconds := in.GetSeconds()
+
+	t := time.NewTicker(time.Duration(in.GetPeriod()) * time.Second)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-ctxW.Done(): // Завершаем работу
+			// Close
+			return myerr.ErrStop
+		case <-t.C:
+			stat, err := cpu.GetAvg(int(seconds))
+			if err == myerr.ErrEmpty {
+				continue
+			}
+			if err != nil {
+				return err
+			}
+			result := new(pb.CpuReply)
+			result.User = stat.User
+			result.System = stat.System
+			result.Idle = stat.Idle
+			if err = out.Send(result); err != nil {
+				return nil // Клиент закрыл соединение
+			}
+		}
+	}
+}

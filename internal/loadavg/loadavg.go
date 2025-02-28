@@ -6,9 +6,9 @@ import (
 	"log/slog"
 	"os"
 	"otus/internal/myerr"
-	"otus/internal/process"
 	"otus/internal/storage"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -20,6 +20,7 @@ const (
 var (
 	dataMon    *storage.Storage[AvgStat]
 	chToParser = make(chan []byte, chSize)
+	Working    atomic.Bool
 )
 
 type (
@@ -33,7 +34,7 @@ type (
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 	dataMon = storage.New[AvgStat]()
 
-	slog.Debug("Loalavg Start")
+	slog.Debug("Load avg Start")
 
 	go parser()
 
@@ -46,6 +47,11 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	defer wgGlobal.Done()
 	defer close(chToParser)
+
+	// Признак работы сборщика данных
+	Working.Store(true)
+	defer Working.Store(false)
+
 	// Используем time.Ticker для точного периода в 1 секунду
 	// Исключаем накапливающуюся ошибку которая возникает при использовании time.After в цикле
 	t := time.NewTicker(time.Second)
@@ -57,8 +63,8 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 			return
 		case <-t.C:
 			if err := getData(); err != nil {
-				slog.Error("Load AVG", "error", err)
-				process.Stop()
+				slog.Error("Load AVG", "error read data from "+fileName, err)
+				// process.Stop() // Останавливаем работу всего сервера или только данного параметра? Если всего сервера - снять комментарий
 				return
 			}
 		}

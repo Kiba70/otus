@@ -3,6 +3,7 @@ package main
 import (
 	"log/slog"
 	"otus/internal/config"
+	"otus/internal/cpu"
 	"otus/internal/loadavg"
 	"otus/internal/process"
 	"otus/internal/web"
@@ -15,6 +16,7 @@ func main() {
 
 	ctx, cancel := process.Start()
 	defer cancel()
+	defer process.Stop()
 
 	if err := config.Start(); err != nil {
 		slog.Error("Config start error", "erroe", err)
@@ -26,9 +28,13 @@ func main() {
 		return
 	}
 
+	if err := cpu.Start(ctx, wgGlobal); err != nil {
+		slog.Error("CPU start error", "error", err)
+		return
+	}
+
 	if err := web.Start(ctx, wgGlobal); err != nil {
-		slog.Error("WEB start error", "erroe", err)
-		process.Stop()
+		slog.Error("WEB start error", "error", err)
 		return
 	}
 
