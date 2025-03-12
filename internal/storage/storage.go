@@ -1,6 +1,7 @@
 package storage
 
 import (
+	"fmt"
 	"log/slog"
 	"sync"
 )
@@ -55,6 +56,7 @@ func (s *Storage[T]) Add(elem T) {
 	}
 
 	// slog.Debug("Storage", "Add", elem)
+	fmt.Println("Storage", "Add", elem)
 }
 
 func (s *Storage[T]) Get(m int) []T {
@@ -75,9 +77,9 @@ func (s *Storage[T]) Get(m int) []T {
 
 	// Необходимые данные разделены на 2 части (начало и конец буфера)
 	ncopy := copy(result, s.elem[:s.headPoint])
-	slog.Debug("Storage copy part1", "num copyed", ncopy)
-	ncopy = copy(result[s.headPoint:], s.elem[m-s.headPoint:])
-	slog.Debug("Storage copy part1", "num copyed", ncopy)
+	slog.Debug("Storage copy part1", "num copyed", ncopy, "head", s.headPoint, "m", m)
+	ncopy = copy(result[s.headPoint:], s.elem[len(s.elem)-(m-s.headPoint):])
+	slog.Debug("Storage copy part2", "num copyed", ncopy, "head", s.headPoint, "m", m)
 
 	return result
 }

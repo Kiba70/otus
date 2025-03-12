@@ -24,8 +24,8 @@ func TestStorageInt(t *testing.T) {
 		require.NotNil(t, s)
 	})
 
-	t.Run("Adding data", func(t *testing.T) {
-		for i := 0; i < 15; i++ {
+	t.Run("Adding data цшер 15 elements", func(t *testing.T) {
+		for i := range 15 {
 			s.Add(i)
 		}
 	})
@@ -34,6 +34,7 @@ func TestStorageInt(t *testing.T) {
 		g := s.Get(10)
 		require.NotNil(t, g)
 		require.Equal(t, 10, len(g))
+		require.Equal(t, []int{10, 11, 12, 13, 14, 5, 6, 7, 8, 9}, g)
 	})
 
 	t.Run("Get 15 elements with len buffer 10", func(t *testing.T) {

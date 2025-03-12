@@ -5,6 +5,7 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
+	"math"
 	"os"
 	"otus/internal/myerr"
 	"otus/internal/storage"
@@ -95,6 +96,8 @@ func getData() error {
 func parser() {
 	defer close(chToCalculator)
 
+	var i int
+
 	for data := range chToParser {
 		if data[:4] != "cpu " {
 			slog.Error("CPU", "incorrect data in parser", data[:4])
@@ -106,10 +109,14 @@ func parser() {
 			nice int
 		)
 
+		i++
+
 		_, err := fmt.Sscanf(data, "cpu %f %d %f %f", &s.User, &nice, &s.System, &s.Idle)
 		if err != nil {
 			slog.Error("CPU", "sscanf error", err)
 		}
+
+		fmt.Println("parser s=", s, "i=", i)
 
 		chToCalculator <- s // Дальше, на вычисление
 	}
@@ -143,7 +150,7 @@ func calculator() {
 
 func GetAvg(m int) (CpuStat, error) {
 	var result, r CpuStat
-	var i int
+	var i, user, system, idle int
 
 	data := dataMon.Get(m)
 	if data == nil {
@@ -151,14 +158,15 @@ func GetAvg(m int) (CpuStat, error) {
 	}
 
 	for i, r = range data {
-		result.User += r.User
-		result.System += r.System
-		result.Idle += r.Idle
+		user += int(math.Round(float64(r.User) * 100))
+		system += int(math.Round(float64(r.System) * 100))
+		idle += int(math.Round(float64(r.Idle) * 100))
 	}
 
-	result.User = float32(int(result.User*100)/i) / 100 // Обрезаем 2 знака после запятой
-	result.System = float32(int(result.System*100)/i) / 100
-	result.Idle = float32(int(result.Idle*100)/i) / 100
+	i++
+	result.User = float32(user/i) / 100 // Обрезаем 2 знака после запятой
+	result.System = float32(system/i) / 100
+	result.Idle = float32(idle/i) / 100
 
 	return result, nil
 }

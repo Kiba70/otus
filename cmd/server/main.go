@@ -10,8 +10,12 @@ import (
 	"sync"
 )
 
+const (
+	logLevel = slog.LevelDebug
+)
+
 func main() {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
+	slog.SetLogLoggerLevel(logLevel)
 	wgGlobal := &sync.WaitGroup{}
 
 	ctx, cancel := process.Start()
@@ -19,22 +23,22 @@ func main() {
 	defer process.Stop()
 
 	if err := config.Start(); err != nil {
-		slog.Error("Config start error", "erroe", err)
+		slog.Error("Server: Config start error", "erroe", err)
 		return
 	}
 
 	if err := loadavg.Start(ctx, wgGlobal); err != nil {
-		slog.Error("LoadAvg start error", "erroe", err)
+		slog.Error("Server: LoadAvg start error", "erroe", err)
 		return
 	}
 
 	if err := cpu.Start(ctx, wgGlobal); err != nil {
-		slog.Error("CPU start error", "error", err)
+		slog.Error("Server: CPU start error", "error", err)
 		return
 	}
 
 	if err := web.Start(ctx, wgGlobal); err != nil {
-		slog.Error("WEB start error", "error", err)
+		slog.Error("Server: WEB start error", "error", err)
 		return
 	}
 

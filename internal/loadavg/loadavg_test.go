@@ -1,6 +1,7 @@
 package loadavg
 
 import (
+	"log/slog"
 	"otus/internal/storage"
 	"testing"
 	"time"
@@ -8,16 +9,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestParser(t *testing.T) {
-	t.Run("Test parser prepare", func(t *testing.T) {
-		dataMon = storage.New[AvgStat]()
+func TestIntegrate(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+	t.Run("Запускаем parser и готовим данные", func(t *testing.T) {
+		dataMon = storage.New[AvgStat](100)
 		go parser()
 		for range 100 {
 			chToParser <- []byte("0.16 0.21 0.21 1/575 139321")
 		}
 	})
 
-	t.Run("Test parser getting", func(t *testing.T) {
+	t.Run("Производим получение усреднённых данных для передачи клиенту", func(t *testing.T) {
 		time.Sleep(time.Second)
 
 		require.Equal(t, 100, len(dataMon.Get(100)))
@@ -29,6 +31,6 @@ func TestParser(t *testing.T) {
 			Fifteen: 0.21,
 		}, g)
 
-		close(chToParser)
+		// close(chToParser) Специально не закрываем канал
 	})
 }
