@@ -57,8 +57,8 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 		case <-ctx.Done():
 			return
 		case <-t.C:
-			if err := getData(); err != nil {
-				slog.Error("CPU", "error read data from netstat", err)
+			if err := getData(ctx); err != nil {
+				slog.Error("Netstat", "error read data from netstat", err)
 				// process.Stop() // Останавливаем работу всего сервера или только сбор данного параметра? Если всего сервера - снять комментарий
 				return
 			}
@@ -66,7 +66,18 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	}
 }
 
-func getData() error {
+func getData(ctxGlobal context.Context) error {
+	ctx, cancel := context.WithTimeout(ctxGlobal, 500*time.Millisecond)
+	defer cancel()
+
+	var cmdOut, errOut strings.Builder
+	cmd := exec.CommandContext(ctx,"netstat", "-lntup")
+	cmd.Stdout = &cmdOut
+	cmd.Error = &errOut
+	if err := cmd.Run(); err != nil {
+		return err
+	}
+	out := cmd.Output()
 
 	return nil
 }
