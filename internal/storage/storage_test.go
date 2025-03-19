@@ -1,3 +1,5 @@
+//go:build unit
+
 package storage_test
 
 import (
@@ -19,12 +21,12 @@ type stype struct {
 
 func TestStorageInt(t *testing.T) {
 	var s *storage.Storage[int]
-	t.Run("Creating storage", func(t *testing.T) {
+	t.Run("Создаём storage размером 10 элементов", func(t *testing.T) {
 		s = storage.New[int](10)
 		require.NotNil(t, s)
 	})
 
-	t.Run("Adding data цшер 15 elements", func(t *testing.T) {
+	t.Run("15 раз добавляем по элементу", func(t *testing.T) {
 		for i := range 15 {
 			s.Add(i)
 		}
@@ -52,7 +54,7 @@ func TestStorageStruct(t *testing.T) {
 	})
 
 	t.Run("Adding data", func(t *testing.T) {
-		for i := 0; i < 15; i++ {
+		for i := range 15 {
 			s2 := &stype{
 				s1: i,
 				s2: i + 1,

@@ -1,7 +1,8 @@
+//go:build integration
+
 package cpu
 
 import (
-	"fmt"
 	"log/slog"
 	"otus/internal/storage"
 	"testing"
@@ -34,11 +35,10 @@ func TestIntegrate(t *testing.T) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 	t.Run("Запускаем parser & calculator и готовим данные", func(t *testing.T) {
 
-		dataMon = storage.New[CpuStat](100)
+		dataMon = storage.New[cpuStatInternal](100)
 		go parser()
 		go calculator()
-		for i, s := range textStat {
-			fmt.Println("Test i=", i, "s=", s)
+		for _, s := range textStat {
 			chToParser <- s
 		}
 	})
@@ -51,7 +51,7 @@ func TestIntegrate(t *testing.T) {
 		require.Nil(t, err)
 		require.Equal(t, CpuStat{
 			User:   0.41,
-			System: 0.72,
+			System: 0.71,
 			Idle:   98.85,
 		}, g)
 	})

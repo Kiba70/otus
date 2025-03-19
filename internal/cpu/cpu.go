@@ -5,7 +5,6 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"math"
 	"os"
 	"otus/internal/myerr"
 	"otus/internal/storage"
@@ -20,9 +19,9 @@ const (
 )
 
 var (
-	dataMon        *storage.Storage[CpuStat]
+	dataMon        *storage.Storage[cpuStatInternal]
 	chToParser     = make(chan string, chSize)
-	chToCalculator = make(chan CpuStat, chSize)
+	chToCalculator = make(chan cpuStatInternal, chSize)
 	Working        atomic.Bool
 )
 
@@ -32,10 +31,15 @@ type (
 		System float32
 		Idle   float32
 	}
+	cpuStatInternal struct {
+		User   int
+		System int
+		Idle   int
+	}
 )
 
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
-	dataMon = storage.New[CpuStat]()
+	dataMon = storage.New[cpuStatInternal]()
 
 	slog.Debug("CPU Start")
 
@@ -105,13 +109,13 @@ func parser() {
 		}
 
 		var (
-			s    CpuStat
+			s    cpuStatInternal
 			nice int
 		)
 
 		i++
 
-		_, err := fmt.Sscanf(data, "cpu %f %d %f %f", &s.User, &nice, &s.System, &s.Idle)
+		_, err := fmt.Sscanf(data, "cpu %d %d %d %d", &s.User, &nice, &s.System, &s.Idle)
 		if err != nil {
 			slog.Error("CPU", "sscanf error", err)
 		}
@@ -124,8 +128,8 @@ func parser() {
 
 func calculator() {
 	var (
-		prev               CpuStat
-		user, system, idle float32
+		prev               cpuStatInternal
+		user, system, idle int
 	)
 
 	for data := range chToCalculator {
@@ -140,17 +144,20 @@ func calculator() {
 
 		prev = data // Для последующей итерации
 
-		data.User = user * 100 / (user + system + idle)
-		data.System = system * 100 / (user + system + idle)
-		data.Idle = idle * 100 / (user + system + idle)
+		data.User = user * 100 * 100 / (user + system + idle)
+		data.System = system * 100 * 100 / (user + system + idle)
+		data.Idle = idle * 100 * 100 / (user + system + idle)
 
 		dataMon.Add(data) // В хранилище
 	}
 }
 
 func GetAvg(m int) (CpuStat, error) {
-	var result, r CpuStat
-	var i, user, system, idle int
+	var (
+		result                CpuStat
+		r                     cpuStatInternal
+		i, user, system, idle int
+	)
 
 	data := dataMon.Get(m)
 	if data == nil {
@@ -158,13 +165,13 @@ func GetAvg(m int) (CpuStat, error) {
 	}
 
 	for i, r = range data {
-		user += int(math.Round(float64(r.User) * 100))
-		system += int(math.Round(float64(r.System) * 100))
-		idle += int(math.Round(float64(r.Idle) * 100))
+		user += r.User
+		system += r.System
+		idle += r.Idle
 	}
 
 	i++
-	result.User = float32(user/i) / 100 // Обрезаем 2 знака после запятой
+	result.User = float32(user/i) / 100
 	result.System = float32(system/i) / 100
 	result.Idle = float32(idle/i) / 100
 

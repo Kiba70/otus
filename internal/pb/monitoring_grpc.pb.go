@@ -21,6 +21,7 @@ const _ = grpc.SupportPackageIsVersion9
 const (
 	Monitoring_LoadAvgGetMon_FullMethodName = "/pb.Monitoring/LoadAvgGetMon"
 	Monitoring_CpuGetMon_FullMethodName     = "/pb.Monitoring/CpuGetMon"
+	Monitoring_NetstatGetMon_FullMethodName = "/pb.Monitoring/NetstatGetMon"
 )
 
 // MonitoringClient is the client API for Monitoring service.
@@ -29,6 +30,7 @@ const (
 type MonitoringClient interface {
 	LoadAvgGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LoadAvgReply], error)
 	CpuGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CpuReply], error)
+	NetstatGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NetstatReply], error)
 }
 
 type monitoringClient struct {
@@ -77,12 +79,32 @@ func (c *monitoringClient) CpuGetMon(ctx context.Context, in *Request, opts ...g
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Monitoring_CpuGetMonClient = grpc.ServerStreamingClient[CpuReply]
 
+func (c *monitoringClient) NetstatGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NetstatReply], error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	stream, err := c.cc.NewStream(ctx, &Monitoring_ServiceDesc.Streams[2], Monitoring_NetstatGetMon_FullMethodName, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &grpc.GenericClientStream[Request, NetstatReply]{ClientStream: stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Monitoring_NetstatGetMonClient = grpc.ServerStreamingClient[NetstatReply]
+
 // MonitoringServer is the server API for Monitoring service.
 // All implementations must embed UnimplementedMonitoringServer
 // for forward compatibility.
 type MonitoringServer interface {
 	LoadAvgGetMon(*Request, grpc.ServerStreamingServer[LoadAvgReply]) error
 	CpuGetMon(*Request, grpc.ServerStreamingServer[CpuReply]) error
+	NetstatGetMon(*Request, grpc.ServerStreamingServer[NetstatReply]) error
 	mustEmbedUnimplementedMonitoringServer()
 }
 
@@ -98,6 +120,9 @@ func (UnimplementedMonitoringServer) LoadAvgGetMon(*Request, grpc.ServerStreamin
 }
 func (UnimplementedMonitoringServer) CpuGetMon(*Request, grpc.ServerStreamingServer[CpuReply]) error {
 	return status.Errorf(codes.Unimplemented, "method CpuGetMon not implemented")
+}
+func (UnimplementedMonitoringServer) NetstatGetMon(*Request, grpc.ServerStreamingServer[NetstatReply]) error {
+	return status.Errorf(codes.Unimplemented, "method NetstatGetMon not implemented")
 }
 func (UnimplementedMonitoringServer) mustEmbedUnimplementedMonitoringServer() {}
 func (UnimplementedMonitoringServer) testEmbeddedByValue()                    {}
@@ -142,6 +167,17 @@ func _Monitoring_CpuGetMon_Handler(srv interface{}, stream grpc.ServerStream) er
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Monitoring_CpuGetMonServer = grpc.ServerStreamingServer[CpuReply]
 
+func _Monitoring_NetstatGetMon_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(Request)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(MonitoringServer).NetstatGetMon(m, &grpc.GenericServerStream[Request, NetstatReply]{ServerStream: stream})
+}
+
+// This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
+type Monitoring_NetstatGetMonServer = grpc.ServerStreamingServer[NetstatReply]
+
 // Monitoring_ServiceDesc is the grpc.ServiceDesc for Monitoring service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -158,6 +194,11 @@ var Monitoring_ServiceDesc = grpc.ServiceDesc{
 		{
 			StreamName:    "CpuGetMon",
 			Handler:       _Monitoring_CpuGetMon_Handler,
+			ServerStreams: true,
+		},
+		{
+			StreamName:    "NetstatGetMon",
+			Handler:       _Monitoring_NetstatGetMon_Handler,
 			ServerStreams: true,
 		},
 	},

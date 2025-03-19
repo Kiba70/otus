@@ -6,6 +6,7 @@ option go_package = "./;pb";
 service Monitoring {
     rpc LoadAvgGetMon (Request) returns (stream LoadAvgReply) {}
     rpc CpuGetMon (Request) returns (stream CpuReply) {}
+    rpc NetstatGetMon (Request) returns (stream NetstatReply) {}
 }
 
 message Request {
@@ -23,4 +24,17 @@ message CpuReply {
     float user = 1;
     float system =2;
     float idle = 3;
+}
+
+message NetstatReply {
+    repeated NetstatSocketReply socket = 1;
+    map <string, int32> conn = 2;
+}
+
+message NetstatSocketReply {
+    string command = 1;
+    int32 pid = 2;
+    string user = 3;
+    string protocol = 4;
+    int32 port = 5;
 }
