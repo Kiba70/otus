@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"otus/internal/pb"
 	"otus/internal/process"
+	"strings"
 
 	// "golang.org/x/exp/slog"
 	"google.golang.org/grpc"
@@ -91,6 +92,11 @@ func loadAvg(ctx context.Context, request *pb.Request) error {
 			break
 		}
 		if err != nil {
+			if strings.Contains(err.Error(), context.DeadlineExceeded.Error()) {
+				fmt.Println("ExCTX")
+				return nil // Нормальное завершение
+			}
+			fmt.Println("ERROR:", err)
 			return err
 		}
 		log.Println("LoadAVG:", message)
@@ -114,6 +120,9 @@ func cpu(ctx context.Context, request *pb.Request) error {
 			break
 		}
 		if err != nil {
+			if strings.Contains(err.Error(), context.DeadlineExceeded.Error()) {
+				return nil // Нормальное завершение
+			}
 			return err
 		}
 		log.Println("CPU:", message)

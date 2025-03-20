@@ -3,7 +3,9 @@ package netstat
 import (
 	"context"
 	"log/slog"
+	"os/exec"
 	"otus/internal/storage"
+	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -70,14 +72,24 @@ func getData(ctxGlobal context.Context) error {
 	ctx, cancel := context.WithTimeout(ctxGlobal, 500*time.Millisecond)
 	defer cancel()
 
-	var cmdOut, errOut strings.Builder
-	cmd := exec.CommandContext(ctx,"netstat", "-lntup")
+	var cmdOut, cmdErr strings.Builder
+	cmd := exec.CommandContext(ctx, "netstat", "-apeW", "-A", "inet", "--numeric-hosts", "--numeric-ports")
 	cmd.Stdout = &cmdOut
-	cmd.Error = &errOut
+	cmd.Stderr = &cmdErr
 	if err := cmd.Run(); err != nil {
 		return err
 	}
-	out := cmd.Output()
+	out, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+
+	for _, s := range strings.Split(string(out), "\n") {
+		if !(s[:3] == "tcp" || s[:3] == "udp") {
+			continue
+		}
+
+	}
 
 	return nil
 }
