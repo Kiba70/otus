@@ -2,9 +2,11 @@ package netstat
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"os/exec"
 	"otus/internal/storage"
+	"regexp"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -12,8 +14,9 @@ import (
 )
 
 var (
-	dataMon *storage.Storage[Netstat]
-	Working atomic.Bool
+	dataMon    *storage.Storage[Netstat]
+	Working    atomic.Bool
+	chToParser = make(chan []byte, 10)
 )
 
 type (
@@ -54,6 +57,9 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	t := time.NewTicker(time.Second)
 	defer t.Stop()
 
+	// Запускаем parser
+	go parser()
+
 	for {
 		select {
 		case <-ctx.Done():
@@ -69,7 +75,7 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 }
 
 func getData(ctxGlobal context.Context) error {
-	ctx, cancel := context.WithTimeout(ctxGlobal, 500*time.Millisecond)
+	ctx, cancel := context.WithTimeout(ctxGlobal, 300*time.Millisecond)
 	defer cancel()
 
 	var cmdOut, cmdErr strings.Builder
@@ -84,12 +90,37 @@ func getData(ctxGlobal context.Context) error {
 		return err
 	}
 
-	for _, s := range strings.Split(string(out), "\n") {
-		if !(s[:3] == "tcp" || s[:3] == "udp") {
-			continue
-		}
-
-	}
+	chToParser <- out
 
 	return nil
+}
+
+func parser() {
+
+	for out := range chToParser {
+		for _, s := range strings.Split(string(out), "\n") {
+			switch s[:3] {
+			case "tcp":
+				parseLineTCP(s)
+			case "udp":
+				parseLineUDP(s)
+			}
+		}
+	}
+
+}
+
+func parseLineTCP(line string) {
+	// r := regexp.MustCompile(`tcp.+:(\d+)\s.*:[*|\d+]\s+([[:graph:]]+)\s+([[:alpha:]]+)\s+\d+\s+(\d+)/?([[:graph:]]*)\s*`)
+	r := regexp.MustCompile(`tcp.+:(\d+)\s.*:[*|\d+]\s+([[:graph:]]+)\s+([[:alpha:]]+)\s+\d+\s+([[:graph:]]*).*`)
+	ss := r.FindStringSubmatch(line)
+	fmt.Println("TCP:", len(ss), ss)
+	for i, s := range ss {
+		fmt.Println("TCP:", i, s)
+	}
+}
+
+func parseLineUDP(line string) {
+	s := strings.Split(line, ":")
+	fmt.Println("UDP:", s)
 }
