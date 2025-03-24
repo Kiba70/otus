@@ -1,8 +1,10 @@
 package netstat
 
 import (
+	"log/slog"
+	"otus/internal/storage"
+	"sync"
 	"testing"
-	"time"
 )
 
 const (
@@ -22,7 +24,8 @@ udp        0      0 0.0.0.0:60050           0.0.0.0:*                           
 udp        0      0 127.0.0.1:53            0.0.0.0:*                           root       26520      1041/dnsmasq        
 udp        0      0 0.0.0.0:111             0.0.0.0:*                           root       20471      1/systemd           
 udp        0      0 0.0.0.0:54558           0.0.0.0:*                           root       28239      1151/rsyslogd       
-udp        0      0 127.0.0.1:323           0.0.0.0:*                           root       26288      1038/chronyd        `
+udp        0      0 127.0.0.1:323           0.0.0.0:*                           root       26288      1038/chronyd        
+`
 	netstatInput2 = `Active Internet connections (servers and established)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name
 tcp        0      0 10.255.255.254:53       0.0.0.0:*               LISTEN      root       20490      -
@@ -37,14 +40,29 @@ tcp        0      0 127.0.0.1:40940         127.0.0.1:37227         ESTABLISHED 
 udp        0      0 127.0.0.54:53           0.0.0.0:*                           systemd-resolve 25755      199/systemd-resolve
 udp        0      0 127.0.0.53:53           0.0.0.0:*                           systemd-resolve 25753      199/systemd-resolve
 udp        0      0 10.255.255.254:53       0.0.0.0:*                           root       20489      -
-udp        0      0 127.0.0.1:323           0.0.0.0:*                           root       19468      -`
+udp        0      0 127.0.0.1:323           0.0.0.0:*                           root       19468      -
+`
 )
 
-func TestIntegrate(t *testing.T) {
+func TestNetstat(t *testing.T) {
+	slog.SetLogLoggerLevel(slog.LevelDebug)
+	var mux sync.Mutex
+
+	dataMon = storage.New[Netstat]()
+
 	t.Run("Запускаем parser и готовим данные", func(t *testing.T) {
-		go parser()
-		chToParser <- []byte(netstatInput)
-		time.Sleep(100 * time.Millisecond)
-		close(chToParser)
+		func() {
+			mux.Lock()
+			defer mux.Unlock()
+
+			chToParser = make(chan []byte, 10)
+			chToParser <- []byte(netstatInput)
+			close(chToParser)
+			parser()
+			chToParser = make(chan []byte, 10)
+			chToParser <- []byte(netstatInput2)
+			close(chToParser)
+			parser()
+		}()
 	})
 }
