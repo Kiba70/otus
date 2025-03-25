@@ -1,4 +1,4 @@
-//go:build unit
+////go:build unit
 
 package storage_test
 
@@ -8,10 +8,6 @@ import (
 
 	"github.com/stretchr/testify/require"
 )
-
-// var (
-// 	s *storage.Storage[int]
-// )
 
 type stype struct {
 	s1 int

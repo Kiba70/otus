@@ -5,17 +5,17 @@ import (
 	"otus/internal/config"
 	"otus/internal/cpu"
 	"otus/internal/loadavg"
+	"otus/internal/netstat"
 	"otus/internal/process"
 	"otus/internal/web"
 	"sync"
 )
 
-const (
-	logLevel = slog.LevelDebug
-)
+// const (
+// 	logLevel = slog.LevelDebug
+// )
 
 func main() {
-	slog.SetLogLoggerLevel(logLevel)
 	wgGlobal := &sync.WaitGroup{}
 
 	ctx, cancel := process.Start()
@@ -27,12 +27,21 @@ func main() {
 		return
 	}
 
+	// if *config.Debug {
+	// 	slog.SetLogLoggerLevel(logLevel)
+	// }
+
 	if err := loadavg.Start(ctx, wgGlobal); err != nil {
 		slog.Error("Server: LoadAvg start error", "erroe", err)
 		return
 	}
 
 	if err := cpu.Start(ctx, wgGlobal); err != nil {
+		slog.Error("Server: CPU start error", "error", err)
+		return
+	}
+
+	if err := netstat.Start(ctx, wgGlobal); err != nil {
 		slog.Error("Server: CPU start error", "error", err)
 		return
 	}

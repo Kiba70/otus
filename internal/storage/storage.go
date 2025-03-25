@@ -1,7 +1,6 @@
 package storage
 
 import (
-	"fmt"
 	"log/slog"
 	"sync"
 )
@@ -55,8 +54,7 @@ func (s *Storage[T]) Add(elem T) {
 		s.headPoint = 0
 	}
 
-	// slog.Debug("Storage", "Add", elem)
-	fmt.Println("Storage", "Add", elem)
+	slog.Debug("Storage", "Add", elem)
 }
 
 func (s *Storage[T]) Get(m int) []T {

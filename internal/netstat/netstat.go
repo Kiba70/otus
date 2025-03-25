@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log/slog"
 	"os/exec"
+	"otus/internal/myerr"
 	"otus/internal/storage"
 	"regexp"
 	"strconv"
@@ -12,6 +13,10 @@ import (
 	"sync"
 	"sync/atomic"
 	"time"
+)
+
+const (
+	chSize = 10
 )
 
 var (
@@ -39,9 +44,9 @@ type (
 
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 	dataMon = storage.New[Netstat]()
-	chToParser = make(chan []byte, 10)
+	chToParser = make(chan []byte, chSize)
 
-	slog.Debug("CPU Start")
+	slog.Info("Start Netstat collector")
 
 	wgGlobal.Add(1)
 	go probber(ctx, wgGlobal)
@@ -51,6 +56,8 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 
 func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	defer wgGlobal.Done()
+	defer slog.Info("Netstat collector stopped")
+	defer close(chToParser)
 
 	// Признак работы сборщика данных
 	Working.Store(true)
@@ -82,13 +89,7 @@ func getData(ctxGlobal context.Context) error {
 	ctx, cancel := context.WithTimeout(ctxGlobal, 300*time.Millisecond)
 	defer cancel()
 
-	var cmdOut, cmdErr strings.Builder
 	cmd := exec.CommandContext(ctx, "netstat", "-apeW", "-A", "inet", "--numeric-hosts", "--numeric-ports")
-	cmd.Stdout = &cmdOut
-	cmd.Stderr = &cmdErr
-	if err := cmd.Run(); err != nil {
-		return err
-	}
 	out, err := cmd.Output()
 	if err != nil {
 		return err
@@ -117,14 +118,25 @@ func parser() {
 					slog.Error("Netstat", "error", err)
 					continue // Ошибка
 				}
-				if status != "" && status != "LISTEN" { // LISTEN - это не соединение
+				if status == "LISTEN" { // Слушаем порт
+					socket.Protocol = "tcp"
+					sockets = append(sockets, socket)
+					continue
+				}
+				if status != "" {
 					conn[status]++ // Счётчик
 				}
-
-				socket.Protocol = "tcp"
-				sockets = append(sockets, socket)
 			case "udp":
-				parseLineUDP(s)
+				socket, err := parseLineUDP(s)
+				if err != nil {
+					slog.Error("Netstat", "error", err)
+					continue // Ошибка
+				}
+
+				// У UDP нет статуса соединения - отображаются только порты, которые открыты для входящих пакетов
+
+				socket.Protocol = "udp"
+				sockets = append(sockets, socket)
 			}
 		}
 
@@ -178,7 +190,7 @@ func parseLineUDP(line string) (Socket, error) {
 	splitLine := regUDP.FindStringSubmatch(line)
 
 	if len(splitLine) != 5 { // столько должно быть распарсенных элементов
-		return sock, errors.New("error in parsing line TCP")
+		return sock, errors.New("error in parsing line UDP")
 	}
 	slog.Debug("Netstat", "port", splitLine[1], "user", splitLine[3], "pid", splitLine[4])
 
@@ -200,4 +212,45 @@ func parseLineUDP(line string) (Socket, error) {
 	}
 
 	return sock, nil
+}
+
+func GetSum(m int) (Netstat, error) {
+	var (
+		result Netstat
+	)
+
+	data := dataMon.Get(m)
+	if data == nil {
+		return result, myerr.ErrEmpty
+	}
+
+	result.Socket = make([]Socket, 0)
+	result.Conn = make(map[string]int32)
+
+	for _, netstat := range data {
+		result.addSockets(netstat.Socket)
+		for conn, count := range netstat.Conn {
+			result.Conn[conn] += count
+		}
+	}
+
+	return result, nil
+}
+
+func (n *Netstat) addSockets(newSockets []Socket) {
+	for _, socket := range newSockets {
+		have := false
+		for _, s := range n.Socket {
+			if equalSocket(s, socket) {
+				have = true
+			}
+		}
+		if !have {
+			n.Socket = append(n.Socket, socket)
+		}
+	}
+}
+
+func equalSocket(s1, s2 Socket) bool {
+	return s1 == s2
 }

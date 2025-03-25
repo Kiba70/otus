@@ -12,6 +12,7 @@ import (
 	"otus/internal/cpu"
 	"otus/internal/loadavg"
 	"otus/internal/myerr"
+	"otus/internal/netstat"
 	"otus/internal/pb"
 	"otus/internal/process"
 
@@ -120,6 +121,49 @@ func (s *server) CpuGetMon(in *pb.Request, out pb.Monitoring_CpuGetMonServer) er
 			result.User = stat.User
 			result.System = stat.System
 			result.Idle = stat.Idle
+			if err = out.Send(result); err != nil {
+				return nil // Клиент закрыл соединение
+			}
+		}
+	}
+}
+
+func (s *server) NetstatGetMon(in *pb.Request, out pb.Monitoring_NetstatGetMonServer) error {
+	if !netstat.Working.Load() {
+		return myerr.ErrNotWork
+	}
+
+	seconds := in.GetSeconds()
+
+	t := time.NewTicker(time.Duration(in.GetPeriod()) * time.Second)
+	defer t.Stop()
+
+	for {
+		select {
+		case <-ctxW.Done(): // Завершаем работу
+			// Close
+			return myerr.ErrStop
+		case <-t.C:
+			stat, err := netstat.GetSum(int(seconds))
+			if err == myerr.ErrEmpty {
+				continue
+			}
+			if err != nil {
+				return err
+			}
+			result := new(pb.NetstatReply)
+			result.Conn = stat.Conn
+			result.Socket = make([]*pb.NetstatSocketReply, 0, len(stat.Socket))
+			for _, socket := range stat.Socket {
+				var pbs pb.NetstatSocketReply
+				pbs.Command = socket.Command
+				pbs.Pid = socket.Pid
+				pbs.Port = socket.Port
+				pbs.Protocol = socket.Protocol
+				pbs.User = socket.User
+				result.Socket = append(result.Socket, &pbs)
+			}
+
 			if err = out.Send(result); err != nil {
 				return nil // Клиент закрыл соединение
 			}

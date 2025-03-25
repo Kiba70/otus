@@ -20,8 +20,8 @@ const (
 
 var (
 	dataMon        *storage.Storage[cpuStatInternal]
-	chToParser     = make(chan string, chSize)
-	chToCalculator = make(chan cpuStatInternal, chSize)
+	chToParser     chan string
+	chToCalculator chan cpuStatInternal
 	Working        atomic.Bool
 )
 
@@ -39,9 +39,11 @@ type (
 )
 
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
-	dataMon = storage.New[cpuStatInternal]()
+	slog.Info("Start CPU collector")
 
-	slog.Debug("CPU Start")
+	dataMon = storage.New[cpuStatInternal]()
+	chToParser = make(chan string, chSize)
+	chToCalculator = make(chan cpuStatInternal, chSize)
 
 	go parser()
 	go calculator()
@@ -54,6 +56,7 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 
 func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	defer wgGlobal.Done()
+	defer slog.Info("CPU collector stopped")
 	defer close(chToParser)
 
 	// Признак работы сборщика данных

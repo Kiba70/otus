@@ -20,7 +20,7 @@ const (
 
 var (
 	dataMon    *storage.Storage[AvgStat]
-	chToParser = make(chan []byte, chSize)
+	chToParser chan []byte
 	Working    atomic.Bool
 )
 
@@ -33,9 +33,10 @@ type (
 )
 
 func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
-	dataMon = storage.New[AvgStat]()
+	slog.Info("Start Load AVG collector")
 
-	slog.Debug("Load avg Start")
+	dataMon = storage.New[AvgStat]()
+	chToParser = make(chan []byte, chSize)
 
 	go parser()
 
@@ -47,6 +48,7 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 
 func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	defer wgGlobal.Done()
+	defer slog.Info("Load AVG collector stopped")
 	defer close(chToParser)
 
 	// Признак работы сборщика данных
