@@ -37,22 +37,5 @@ func TestIntegrate(t *testing.T) {
 		defer cancel()
 
 		require.NoError(t, cpu(ctx, request))
-
-		// stream, err := client.LoadAvgGetMon(context.Background(), request)
-		// if err != nil {
-		// 	return
-		// }
-
-		// for range 5 {
-		// 	message, err := stream.Recv()
-		// 	if err == io.EOF {
-		// 		break
-		// 	}
-		// 	if err != nil {
-		// 		return
-		// 	}
-		// 	require.NoError(t, err)
-		// 	log.Println("Received message:", message)
-		// }
 	})
 }

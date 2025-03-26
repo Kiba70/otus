@@ -123,8 +123,6 @@ func parser() {
 			slog.Error("CPU", "sscanf error", err)
 		}
 
-		fmt.Println("parser s=", s, "i=", i)
-
 		chToCalculator <- s // Дальше, на вычисление
 	}
 }

@@ -3,8 +3,8 @@
 package cpu
 
 import (
-	"log/slog"
 	"otus/internal/storage"
+	"sync"
 	"testing"
 	"time"
 
@@ -31,20 +31,33 @@ cpu1 11589 0 15849 3003312 15531 0 7943 0 0 0
 cpu2 19266 0 33390 2977919 10790 0 3905 0 0 0`,
 }
 
-func TestIntegrate(t *testing.T) {
-	slog.SetLogLoggerLevel(slog.LevelDebug)
-	t.Run("Запускаем parser & calculator и готовим данные", func(t *testing.T) {
+var mux sync.Mutex
 
-		dataMon = storage.New[cpuStatInternal](100)
-		go parser()
-		go calculator()
+func TestCPU(t *testing.T) {
+	// slog.SetLogLoggerLevel(slog.LevelDebug)
+
+	// Блок должен выполняться как единое целое
+	// Тест хотя выполняется как unit test, по факту является интеграционным по всему модулю CPU
+	// (парсинг, вычисление, хранение и выбоорка средних значений)
+	mux.Lock()
+	defer mux.Unlock()
+
+	dataMon = storage.New[cpuStatInternal](100)
+	chToParser = make(chan string, chSize)
+	defer close(chToParser)
+	chToCalculator = make(chan cpuStatInternal, chSize) // Закрывается в парсере
+
+	go parser()
+	go calculator()
+	t.Run("Готовим данные", func(t *testing.T) {
+
 		for _, s := range textStat {
 			chToParser <- s
 		}
 	})
 
 	t.Run("Производим получение усреднённых данных для передачи клиенту", func(t *testing.T) {
-		time.Sleep(time.Second)
+		time.Sleep(time.Millisecond * 10)
 
 		require.Equal(t, 4, len(dataMon.Get(4)))
 		g, err := GetAvg(4)

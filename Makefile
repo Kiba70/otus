@@ -6,7 +6,7 @@ build:
 
 
 run: build
-	@./bin/server -d
+	@OTUS_MOD_START=cpu,loadavg,netstat ./bin/server -d
 
 proto: 
 	# rm -rf internal/pb

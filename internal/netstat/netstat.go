@@ -23,8 +23,8 @@ var (
 	dataMon    *storage.Storage[Netstat]
 	Working    atomic.Bool
 	chToParser chan []byte
-	regTCP     = regexp.MustCompile(`tcp.+:(\d+)\s.*:(\*|\d+)\s+([[:graph:]]+)\s+([\w-_]+)\s+\d+\s+([[:graph:]]*).*`)
-	regUDP     = regexp.MustCompile(`udp.+:(\d+)\s.*:(\*|\d+)\s+([\w-_]+)\s+\d+\s+([[:graph:]]*).*`)
+	regTCP     = regexp.MustCompile(`tcp.+:(\d+)\s.*:(\*|\d+)\s+([[:graph:]]+)\s+([\w-_@\.]+)\s+\d+\s+([[:graph:]]*).*`)
+	regUDP     = regexp.MustCompile(`udp.+:(\d+)\s.*:(\*|\d+)\s+([\w-_@\.]+)\s+\d+\s+([[:graph:]]*).*`)
 )
 
 type (
@@ -59,6 +59,8 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 	defer slog.Info("Netstat collector stopped")
 	defer close(chToParser)
 
+	errorNetstatCount := 100 // Счётчик ошибочных запусков Netstat
+
 	// Признак работы сборщика данных
 	Working.Store(true)
 	defer Working.Store(false)
@@ -79,7 +81,10 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 			if err := getData(ctx); err != nil {
 				slog.Error("Netstat", "error read data from netstat", err)
 				// process.Stop() // Останавливаем работу всего сервера или только сбор данного параметра? Если всего сервера - снять комментарий
-				return
+				if errorNetstatCount <= 0 { // Иногда netstat завершается с ошибкой - игнорируем несколько ошибок
+					return
+				}
+				errorNetstatCount--
 			}
 		}
 	}
@@ -194,7 +199,7 @@ func parseLineUDP(line string) (Socket, error) {
 	}
 	slog.Debug("Netstat", "port", splitLine[1], "user", splitLine[3], "pid", splitLine[4])
 
-	sock.User = splitLine[4]
+	sock.User = splitLine[3]
 
 	if i32, err := strconv.Atoi(splitLine[1]); err == nil {
 		sock.Port = int32(i32)

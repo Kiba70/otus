@@ -11,10 +11,6 @@ import (
 	"sync"
 )
 
-// const (
-// 	logLevel = slog.LevelDebug
-// )
-
 func main() {
 	wgGlobal := &sync.WaitGroup{}
 
@@ -22,28 +18,31 @@ func main() {
 	defer cancel()
 	defer process.Stop()
 
-	if err := config.Start(); err != nil {
-		slog.Error("Server: Config start error", "erroe", err)
+	modules := config.Start()
+	if len(modules) == 0 {
+		slog.Error("Server: Config start error", "error", "nothing modules for start")
 		return
 	}
 
-	// if *config.Debug {
-	// 	slog.SetLogLoggerLevel(logLevel)
-	// }
-
-	if err := loadavg.Start(ctx, wgGlobal); err != nil {
-		slog.Error("Server: LoadAvg start error", "erroe", err)
-		return
+	if _, on := modules["loadavg"]; on {
+		if err := loadavg.Start(ctx, wgGlobal); err != nil {
+			slog.Error("Server: LoadAvg start error", "error", err)
+			return
+		}
 	}
 
-	if err := cpu.Start(ctx, wgGlobal); err != nil {
-		slog.Error("Server: CPU start error", "error", err)
-		return
+	if _, on := modules["cpu"]; on {
+		if err := cpu.Start(ctx, wgGlobal); err != nil {
+			slog.Error("Server: CPU start error", "error", err)
+			return
+		}
 	}
 
-	if err := netstat.Start(ctx, wgGlobal); err != nil {
-		slog.Error("Server: CPU start error", "error", err)
-		return
+	if _, on := modules["netstat"]; on {
+		if err := netstat.Start(ctx, wgGlobal); err != nil {
+			slog.Error("Server: Netstat start error", "error", err)
+			return
+		}
 	}
 
 	if err := web.Start(ctx, wgGlobal); err != nil {

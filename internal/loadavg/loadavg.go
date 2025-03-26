@@ -108,14 +108,12 @@ func GetAvg(m int) (AvgStat, error) {
 
 	// Сразу переводим в int для исключени ошибки плавающей точки
 	for i, r = range data {
-		fmt.Println("r=", r.One, "res=", one)
 		one += int(math.Round(float64(r.One) * 100))
 		five += int(math.Round(float64(r.Five) * 100))
 		fifteen += int(math.Round(float64(r.Fifteen) * 100))
 	}
 
 	i++
-	fmt.Println("i=", i, "One=", one)
 	result.One = float32(one/i) / 100 // Обрезаем 2 знака после запятой
 	result.Five = float32(five/i) / 100
 	result.Fifteen = float32(fifteen/i) / 100

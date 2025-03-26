@@ -44,9 +44,10 @@ udp        0      0 127.0.0.1:323           0.0.0.0:*                           
 `
 )
 
+var mux sync.Mutex
+
 func TestNetstat(t *testing.T) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
-	var mux sync.Mutex
 
 	dataMon = storage.New[Netstat]()
 
