@@ -20,7 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	Monitoring_LoadAvgGetMon_FullMethodName = "/pb.Monitoring/LoadAvgGetMon"
-	Monitoring_CpuGetMon_FullMethodName     = "/pb.Monitoring/CpuGetMon"
+	Monitoring_CPUGetMon_FullMethodName     = "/pb.Monitoring/CPUGetMon"
 	Monitoring_NetstatGetMon_FullMethodName = "/pb.Monitoring/NetstatGetMon"
 )
 
@@ -29,7 +29,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type MonitoringClient interface {
 	LoadAvgGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[LoadAvgReply], error)
-	CpuGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CpuReply], error)
+	CPUGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CpuReply], error)
 	NetstatGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NetstatReply], error)
 }
 
@@ -60,9 +60,9 @@ func (c *monitoringClient) LoadAvgGetMon(ctx context.Context, in *Request, opts 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Monitoring_LoadAvgGetMonClient = grpc.ServerStreamingClient[LoadAvgReply]
 
-func (c *monitoringClient) CpuGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CpuReply], error) {
+func (c *monitoringClient) CPUGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[CpuReply], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
-	stream, err := c.cc.NewStream(ctx, &Monitoring_ServiceDesc.Streams[1], Monitoring_CpuGetMon_FullMethodName, cOpts...)
+	stream, err := c.cc.NewStream(ctx, &Monitoring_ServiceDesc.Streams[1], Monitoring_CPUGetMon_FullMethodName, cOpts...)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +77,7 @@ func (c *monitoringClient) CpuGetMon(ctx context.Context, in *Request, opts ...g
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Monitoring_CpuGetMonClient = grpc.ServerStreamingClient[CpuReply]
+type Monitoring_CPUGetMonClient = grpc.ServerStreamingClient[CpuReply]
 
 func (c *monitoringClient) NetstatGetMon(ctx context.Context, in *Request, opts ...grpc.CallOption) (grpc.ServerStreamingClient[NetstatReply], error) {
 	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
@@ -103,7 +103,7 @@ type Monitoring_NetstatGetMonClient = grpc.ServerStreamingClient[NetstatReply]
 // for forward compatibility.
 type MonitoringServer interface {
 	LoadAvgGetMon(*Request, grpc.ServerStreamingServer[LoadAvgReply]) error
-	CpuGetMon(*Request, grpc.ServerStreamingServer[CpuReply]) error
+	CPUGetMon(*Request, grpc.ServerStreamingServer[CpuReply]) error
 	NetstatGetMon(*Request, grpc.ServerStreamingServer[NetstatReply]) error
 	mustEmbedUnimplementedMonitoringServer()
 }
@@ -118,8 +118,8 @@ type UnimplementedMonitoringServer struct{}
 func (UnimplementedMonitoringServer) LoadAvgGetMon(*Request, grpc.ServerStreamingServer[LoadAvgReply]) error {
 	return status.Errorf(codes.Unimplemented, "method LoadAvgGetMon not implemented")
 }
-func (UnimplementedMonitoringServer) CpuGetMon(*Request, grpc.ServerStreamingServer[CpuReply]) error {
-	return status.Errorf(codes.Unimplemented, "method CpuGetMon not implemented")
+func (UnimplementedMonitoringServer) CPUGetMon(*Request, grpc.ServerStreamingServer[CpuReply]) error {
+	return status.Errorf(codes.Unimplemented, "method CPUGetMon not implemented")
 }
 func (UnimplementedMonitoringServer) NetstatGetMon(*Request, grpc.ServerStreamingServer[NetstatReply]) error {
 	return status.Errorf(codes.Unimplemented, "method NetstatGetMon not implemented")
@@ -156,16 +156,16 @@ func _Monitoring_LoadAvgGetMon_Handler(srv interface{}, stream grpc.ServerStream
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
 type Monitoring_LoadAvgGetMonServer = grpc.ServerStreamingServer[LoadAvgReply]
 
-func _Monitoring_CpuGetMon_Handler(srv interface{}, stream grpc.ServerStream) error {
+func _Monitoring_CPUGetMon_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Request)
 	if err := stream.RecvMsg(m); err != nil {
 		return err
 	}
-	return srv.(MonitoringServer).CpuGetMon(m, &grpc.GenericServerStream[Request, CpuReply]{ServerStream: stream})
+	return srv.(MonitoringServer).CPUGetMon(m, &grpc.GenericServerStream[Request, CpuReply]{ServerStream: stream})
 }
 
 // This type alias is provided for backwards compatibility with existing code that references the prior non-generic stream type by name.
-type Monitoring_CpuGetMonServer = grpc.ServerStreamingServer[CpuReply]
+type Monitoring_CPUGetMonServer = grpc.ServerStreamingServer[CpuReply]
 
 func _Monitoring_NetstatGetMon_Handler(srv interface{}, stream grpc.ServerStream) error {
 	m := new(Request)
@@ -192,8 +192,8 @@ var Monitoring_ServiceDesc = grpc.ServiceDesc{
 			ServerStreams: true,
 		},
 		{
-			StreamName:    "CpuGetMon",
-			Handler:       _Monitoring_CpuGetMon_Handler,
+			StreamName:    "CPUGetMon",
+			Handler:       _Monitoring_CPUGetMon_Handler,
 			ServerStreams: true,
 		},
 		{

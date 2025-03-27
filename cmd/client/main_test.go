@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 	"log/slog"
-	"otus/internal/pb"
 	"testing"
 	"time"
+
+	"otus/internal/pb"
 
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"

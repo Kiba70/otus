@@ -5,7 +5,7 @@ option go_package = "./;pb";
 
 service Monitoring {
     rpc LoadAvgGetMon (Request) returns (stream LoadAvgReply) {}
-    rpc CpuGetMon (Request) returns (stream CpuReply) {}
+    rpc CPUGetMon (Request) returns (stream CpuReply) {}
     rpc NetstatGetMon (Request) returns (stream NetstatReply) {}
 }
 

@@ -1,14 +1,16 @@
 package main
 
+//nolint:gofumpt,gci
 import (
 	"log/slog"
+	"sync" //nolint:gofumpt
+
 	"otus/internal/config"
 	"otus/internal/cpu"
 	"otus/internal/loadavg"
 	"otus/internal/netstat"
 	"otus/internal/process"
-	"otus/internal/web"
-	"sync"
+	"otus/internal/web" //nolint:gofumpt,nolintlint
 )
 
 func main() {

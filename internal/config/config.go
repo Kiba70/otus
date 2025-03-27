@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	all_modules = "cpu,loadavg,netstat"
+	allModules = "cpu,loadavg,netstat"
 )
 
 var (
@@ -24,16 +24,16 @@ func Start() map[string]struct{} {
 		slog.SetLogLoggerLevel(slog.LevelDebug)
 	}
 
-	modules_env := os.Getenv(*EnvName)
+	modulesEnv := os.Getenv(*EnvName)
 
-	if modules_env == "" {
-		modules_env = all_modules // Переменная окружения не установлена - запускаем всё
+	if modulesEnv == "" {
+		modulesEnv = allModules // Переменная окружения не установлена - запускаем всё
 	}
 
 	modules := make(map[string]struct{})
 
-	for _, s := range strings.Split(modules_env, ",") {
-		if strings.Contains(all_modules, s) { // Проверяем на корректность
+	for _, s := range strings.Split(modulesEnv, ",") {
+		if strings.Contains(allModules, s) { // Проверяем на корректность
 			modules[s] = struct{}{}
 		}
 	}

@@ -2,11 +2,13 @@ package netstat
 
 import (
 	"log/slog"
-	"otus/internal/storage"
 	"sync"
 	"testing"
+
+	"otus/internal/storage"
 )
 
+//nolint:lll
 const (
 	netstatInput = `Active Internet connections (servers and established)
 Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name    
@@ -51,7 +53,7 @@ func TestNetstat(t *testing.T) {
 
 	dataMon = storage.New[Netstat]()
 
-	t.Run("Запускаем parser и готовим данные", func(t *testing.T) {
+	t.Run("Запускаем parser и готовим данные", func(_ *testing.T) {
 		func() {
 			mux.Lock()
 			defer mux.Unlock()

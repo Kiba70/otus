@@ -3,8 +3,9 @@
 package storage_test
 
 import (
-	"otus/internal/storage"
 	"testing"
+
+	"otus/internal/storage" //nolint:gci
 
 	"github.com/stretchr/testify/require"
 )
@@ -22,7 +23,7 @@ func TestStorageInt(t *testing.T) {
 		require.NotNil(t, s)
 	})
 
-	t.Run("15 раз добавляем по элементу", func(t *testing.T) {
+	t.Run("15 раз добавляем по элементу", func(_ *testing.T) {
 		for i := range 15 {
 			s.Add(i)
 		}
@@ -49,7 +50,7 @@ func TestStorageStruct(t *testing.T) {
 		require.NotNil(t, s)
 	})
 
-	t.Run("Adding data", func(t *testing.T) {
+	t.Run("Adding data", func(_ *testing.T) {
 		for i := range 15 {
 			s2 := &stype{
 				s1: i,

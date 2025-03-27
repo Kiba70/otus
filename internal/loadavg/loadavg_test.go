@@ -3,10 +3,11 @@
 package loadavg
 
 import (
-	"otus/internal/storage"
 	"sync"
 	"testing"
 	"time"
+
+	"otus/internal/storage"
 
 	"github.com/stretchr/testify/require"
 )
@@ -17,8 +18,9 @@ func TestLoadAVG(t *testing.T) {
 	// slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	// Блок должен выполняться как единое целое
-	// Тест хотя выполняется как unit test, по факту является интеграционным по всему модулю LoadAVG
-	// (парсинг, хранение и выбоорка средних значений)
+	// Не смотря на то, что тест выполняется как unit test,
+	// по факту является интеграционным по всему модулю LoadAVG
+	// (парсинг, хранение и затем выбоорка средних значений)
 	mux.Lock()
 	defer mux.Unlock()
 
@@ -27,12 +29,12 @@ func TestLoadAVG(t *testing.T) {
 	defer close(chToParser)
 
 	go parser()
-	t.Run("Готовим данные", func(t *testing.T) {
 
-		for range 100 {
-			chToParser <- []byte("0.16 0.21 0.21 1/575 139321")
-		}
-	})
+	// Готовим данные
+	// (данные обрабатываются parser и кладутся в storage)
+	for range 100 {
+		chToParser <- []byte("0.16 0.21 0.21 1/575 139321")
+	}
 
 	t.Run("Производим получение усреднённых данных для передачи клиенту", func(t *testing.T) {
 		time.Sleep(time.Millisecond * 10)

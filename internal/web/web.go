@@ -1,7 +1,9 @@
 package web
 
+//nolint:gofumpt,gci
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log/slog"
 	"net"
@@ -51,7 +53,7 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 		slog.DebugContext(ctxW, "Завершение WEB сервера")
 	}()
 
-	// Gracefull shutdown
+	// Graceful shutdown
 	go func() {
 		<-ctx.Done()
 		s.Stop()
@@ -60,7 +62,7 @@ func Start(ctx context.Context, wgGlobal *sync.WaitGroup) error {
 	return nil
 }
 
-func (s *server) LoadAvgGetMon(in *pb.Request, out pb.Monitoring_LoadAvgGetMonServer) error {
+func (s *server) LoadAvgGetMon(in *pb.Request, out pb.Monitoring_LoadAvgGetMonServer) error { //nolint:dupl
 	if !loadavg.Working.Load() {
 		return myerr.ErrNotWork
 	}
@@ -77,7 +79,7 @@ func (s *server) LoadAvgGetMon(in *pb.Request, out pb.Monitoring_LoadAvgGetMonSe
 			return myerr.ErrStop
 		case <-t.C:
 			stat, err := loadavg.GetAvg(int(seconds))
-			if err == myerr.ErrEmpty {
+			if errors.Is(err, myerr.ErrEmpty) {
 				continue
 			}
 			if err != nil {
@@ -94,7 +96,7 @@ func (s *server) LoadAvgGetMon(in *pb.Request, out pb.Monitoring_LoadAvgGetMonSe
 	}
 }
 
-func (s *server) CpuGetMon(in *pb.Request, out pb.Monitoring_CpuGetMonServer) error {
+func (s *server) CPUGetMon(in *pb.Request, out pb.Monitoring_CPUGetMonServer) error { //nolint:dupl
 	if !cpu.Working.Load() {
 		return myerr.ErrNotWork
 	}
@@ -111,7 +113,7 @@ func (s *server) CpuGetMon(in *pb.Request, out pb.Monitoring_CpuGetMonServer) er
 			return myerr.ErrStop
 		case <-t.C:
 			stat, err := cpu.GetAvg(int(seconds))
-			if err == myerr.ErrEmpty {
+			if errors.Is(err, myerr.ErrEmpty) {
 				continue
 			}
 			if err != nil {
@@ -145,7 +147,7 @@ func (s *server) NetstatGetMon(in *pb.Request, out pb.Monitoring_NetstatGetMonSe
 			return myerr.ErrStop
 		case <-t.C:
 			stat, err := netstat.GetSum(int(seconds))
-			if err == myerr.ErrEmpty {
+			if errors.Is(err, myerr.ErrEmpty) {
 				continue
 			}
 			if err != nil {

@@ -1,16 +1,18 @@
 package cpu
 
+//nolint:gofumpt,gci,nolintlint
 import (
 	"bufio"
 	"context"
 	"fmt"
 	"log/slog"
 	"os"
-	"otus/internal/myerr"
-	"otus/internal/storage"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"otus/internal/myerr"
+	"otus/internal/storage"
 )
 
 const (
@@ -26,7 +28,7 @@ var (
 )
 
 type (
-	CpuStat struct {
+	CPUStat struct { //nolint:revive
 		User   float32
 		System float32
 		Idle   float32
@@ -75,7 +77,9 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 		case <-t.C:
 			if err := getData(); err != nil {
 				slog.Error("CPU", "error read data from "+fileName, err)
-				// process.Stop() // Останавливаем работу всего сервера или только сбор данного параметра? Если всего сервера - снять комментарий
+				// process.Stop()
+				// Останавливаем работу всего сервера или только сбор данного параметра?
+				// Если всего сервера - снять комментарий
 				return
 			}
 		}
@@ -134,7 +138,8 @@ func calculator() {
 	)
 
 	for data := range chToCalculator {
-		if prev.User == 0 && prev.System == 0 && prev.Idle == 0 { // Первая итерация - пропускаем, готовим данные для вычисления
+		if prev.User == 0 && prev.System == 0 && prev.Idle == 0 {
+			// Первая итерация - пропускаем, готовим данные для вычисления
 			prev = data
 			continue
 		}
@@ -153,9 +158,9 @@ func calculator() {
 	}
 }
 
-func GetAvg(m int) (CpuStat, error) {
+func GetAvg(m int) (CPUStat, error) {
 	var (
-		result                CpuStat
+		result                CPUStat
 		r                     cpuStatInternal
 		i, user, system, idle int
 	)

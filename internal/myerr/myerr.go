@@ -3,7 +3,7 @@ package myerr
 import "errors"
 
 var (
-	ErrEmpty   = errors.New("Empty data")
-	ErrStop    = errors.New("Service stopped")
-	ErrNotWork = errors.New("Service not working")
+	ErrEmpty   = errors.New("empty data")
+	ErrStop    = errors.New("service stopped")
+	ErrNotWork = errors.New("service not working")
 )

@@ -6,11 +6,12 @@ import (
 	"log/slog"
 	"math"
 	"os"
-	"otus/internal/myerr"
-	"otus/internal/storage"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"otus/internal/myerr"
+	"otus/internal/storage"
 )
 
 const (
@@ -67,7 +68,9 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 		case <-t.C:
 			if err := getData(); err != nil {
 				slog.Error("Load AVG", "error read data from "+fileName, err)
-				// process.Stop() // Останавливаем работу всего сервера или только данного параметра? Если всего сервера - снять комментарий
+				// process.Stop()
+				// Останавливаем работу всего сервера или только данного параметра?
+				// Если всего сервера - снять комментарий
 				return
 			}
 		}

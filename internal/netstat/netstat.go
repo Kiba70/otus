@@ -5,14 +5,15 @@ import (
 	"errors"
 	"log/slog"
 	"os/exec"
-	"otus/internal/myerr"
-	"otus/internal/storage"
 	"regexp"
 	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
 	"time"
+
+	"otus/internal/myerr"
+	"otus/internal/storage"
 )
 
 const (
@@ -80,7 +81,9 @@ func probber(ctx context.Context, wgGlobal *sync.WaitGroup) {
 		case <-t.C:
 			if err := getData(ctx); err != nil {
 				slog.Error("Netstat", "error read data from netstat", err)
-				// process.Stop() // Останавливаем работу всего сервера или только сбор данного параметра? Если всего сервера - снять комментарий
+				// process.Stop()
+				// Останавливаем работу всего сервера или только сбор данного параметра?
+				// Если всего сервера - снять комментарий
 				if errorNetstatCount <= 0 { // Иногда netstat завершается с ошибкой - игнорируем несколько ошибок
 					return
 				}
@@ -106,7 +109,6 @@ func getData(ctxGlobal context.Context) error {
 }
 
 func parser() {
-
 	for out := range chToParser {
 		sockets := make([]Socket, 0, strings.Count(string(out), "\n")+1)
 		conn := make(map[string]int32)
@@ -152,7 +154,6 @@ func parser() {
 
 		dataMon.Add(netstat)
 	}
-
 }
 
 func parseLineTCP(line string) (Socket, string, error) {
@@ -170,7 +171,7 @@ func parseLineTCP(line string) (Socket, string, error) {
 	sock.User = splitLine[4]
 
 	if i32, err := strconv.Atoi(splitLine[1]); err == nil {
-		sock.Port = int32(i32)
+		sock.Port = int32(i32) //nolint:gosec
 	}
 
 	if splitLine[5] != "-" {
@@ -179,7 +180,7 @@ func parseLineTCP(line string) (Socket, string, error) {
 			return sock, splitLine[3], nil // Значения по умолчанию
 		}
 		if i32, err := strconv.Atoi(s2[0]); err == nil {
-			sock.Pid = int32(i32)
+			sock.Pid = int32(i32) //nolint:gosec
 		}
 		sock.Command = s2[1]
 	}
@@ -202,7 +203,7 @@ func parseLineUDP(line string) (Socket, error) {
 	sock.User = splitLine[3]
 
 	if i32, err := strconv.Atoi(splitLine[1]); err == nil {
-		sock.Port = int32(i32)
+		sock.Port = int32(i32) //nolint:gosec
 	}
 
 	if splitLine[4] != "-" {
@@ -211,7 +212,7 @@ func parseLineUDP(line string) (Socket, error) {
 			return sock, nil // Значения по умолчанию
 		}
 		if i32, err := strconv.Atoi(s2[0]); err == nil {
-			sock.Pid = int32(i32)
+			sock.Pid = int32(i32) //nolint:gosec
 		}
 		sock.Command = s2[1]
 	}
@@ -220,9 +221,7 @@ func parseLineUDP(line string) (Socket, error) {
 }
 
 func GetSum(m int) (Netstat, error) {
-	var (
-		result Netstat
-	)
+	var result Netstat
 
 	data := dataMon.Get(m)
 	if data == nil {

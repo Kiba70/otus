@@ -1,17 +1,19 @@
 package main
 
+//nolint:gofumpt,gci,nolintlint
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io"
 	"log"
 	"log/slog"
-	"otus/internal/pb"
-	"otus/internal/process"
 	"strings"
 
-	// "golang.org/x/exp/slog"
+	"otus/internal/pb" //nolint:gci
+	"otus/internal/process"
+
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -21,10 +23,12 @@ const (
 )
 
 var (
-	Port, Seconds, Period *int
-	Server, MonParametr   *string
-	// conn                  *grpc.ClientConn
-	client pb.MonitoringClient
+	Port        *int
+	Seconds     *int
+	Period      *int
+	Server      *string
+	MonParametr *string
+	client      pb.MonitoringClient
 )
 
 func init() {
@@ -52,6 +56,7 @@ func main() {
 	defer conn.Close()
 	client = pb.NewMonitoringClient(conn)
 
+	//nolint:gosec
 	request := &pb.Request{
 		Period:  int32(*Period),
 		Seconds: int32(*Seconds),
@@ -94,12 +99,12 @@ func loadAvg(ctx context.Context, request *pb.Request) error {
 
 	for {
 		message, err := stream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
 			if strings.Contains(err.Error(), context.DeadlineExceeded.Error()) {
-				fmt.Println("ExCTX")
+				slog.Debug("ExCTX")
 				return nil // Нормальное завершение
 			}
 			fmt.Println("ERROR:", err)
@@ -115,14 +120,14 @@ func loadAvg(ctx context.Context, request *pb.Request) error {
 func cpu(ctx context.Context, request *pb.Request) error {
 	slog.Debug("Client: Streaming started")
 
-	stream, err := client.CpuGetMon(ctx, request)
+	stream, err := client.CPUGetMon(ctx, request)
 	if err != nil {
 		return err
 	}
 
 	for {
 		message, err := stream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -149,7 +154,7 @@ func netstat(ctx context.Context, request *pb.Request) error {
 
 	for {
 		message, err := stream.Recv()
-		if err == io.EOF {
+		if errors.Is(err, io.EOF) {
 			break
 		}
 		if err != nil {
@@ -171,7 +176,8 @@ func netstat(ctx context.Context, request *pb.Request) error {
 		}
 		fmt.Printf("\nLISTENS:\n%4s | %5s | %25s | %6s | %20s\n", "Prot", "Port", "User", "PID", "Command")
 		for _, socket := range message.Socket {
-			fmt.Printf("%4s | %5d | %25s | %6d | %20s\n", socket.GetProtocol(), socket.GetPort(), socket.GetUser(), socket.GetPid(), socket.GetCommand())
+			fmt.Printf("%4s | %5d | %25s | %6d | %20s\n", socket.GetProtocol(),
+				socket.GetPort(), socket.GetUser(), socket.GetPid(), socket.GetCommand())
 		}
 		fmt.Printf("-------------------------------------\n\n")
 	}

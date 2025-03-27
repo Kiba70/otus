@@ -2,11 +2,13 @@
 
 package cpu
 
+//nolint:gofumpt,gci
 import (
-	"otus/internal/storage"
 	"sync"
 	"testing"
 	"time"
+
+	"otus/internal/storage"
 
 	"github.com/stretchr/testify/require"
 )
@@ -49,12 +51,12 @@ func TestCPU(t *testing.T) {
 
 	go parser()
 	go calculator()
-	t.Run("Готовим данные", func(t *testing.T) {
 
-		for _, s := range textStat {
-			chToParser <- s
-		}
-	})
+	// Готовим данные
+	// Производится обработка в parser, вычисление в calculator и занесение в storage
+	for _, s := range textStat {
+		chToParser <- s
+	}
 
 	t.Run("Производим получение усреднённых данных для передачи клиенту", func(t *testing.T) {
 		time.Sleep(time.Millisecond * 10)
@@ -62,7 +64,7 @@ func TestCPU(t *testing.T) {
 		require.Equal(t, 4, len(dataMon.Get(4)))
 		g, err := GetAvg(4)
 		require.Nil(t, err)
-		require.Equal(t, CpuStat{
+		require.Equal(t, CPUStat{
 			User:   0.41,
 			System: 0.71,
 			Idle:   98.85,
