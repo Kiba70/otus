@@ -7,7 +7,7 @@ build:
 
 integration:
 	@echo "Start server"
-	@OTUS_MOD_START=cpu,loadavg go run ./cmd/server &
+	@OTUS_MOD_START=cpu,loadavg,netstat go run ./cmd/server &
 	@echo "Start test"
 	@go test -v -count=1 ./cmd/client/
 
