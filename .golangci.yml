@@ -67,14 +67,16 @@ linters:
     - exhaustive
     - copyloopvar
     - funlen
-    #- gci отключено в связи с нестабильной работой - случайные срабатывания в разных местах
+    #- gci
+    #- gci отключено в связи с нестабильной работой - случайные срабатывания в разных местах import
     - gocognit
     - goconst
     - gocritic
     - gocyclo
     - godot
     - gofmt
-    # - gofumpt отключено в связи с нестабильной работой - случайные срабатывания в разных местах
+    #- gofumpt
+    # - gofumpt отключено в связи с нестабильной работой - случайные срабатывания в разных местах import
     - goheader
     - goprintffuncname
     - gosec

@@ -2,10 +2,11 @@ package netstat
 
 import (
 	"log/slog"
-	"sync"
 	"testing"
 
 	"otus/internal/storage"
+
+	"github.com/stretchr/testify/require"
 )
 
 //nolint:lll
@@ -28,44 +29,24 @@ udp        0      0 0.0.0.0:111             0.0.0.0:*                           
 udp        0      0 0.0.0.0:54558           0.0.0.0:*                           root       28239      1151/rsyslogd       
 udp        0      0 127.0.0.1:323           0.0.0.0:*                           root       26288      1038/chronyd        
 `
-	netstatInput2 = `Active Internet connections (servers and established)
-Proto Recv-Q Send-Q Local Address           Foreign Address         State       User       Inode      PID/Program name
-tcp        0      0 10.255.255.254:53       0.0.0.0:*               LISTEN      root       20490      -
-tcp        0      0 127.0.0.1:37227         0.0.0.0:*               LISTEN      hev        28833      413/node
-tcp        0      0 127.0.0.54:53           0.0.0.0:*               LISTEN      systemd-resolve 25756      199/systemd-resolve
-tcp        0      0 127.0.0.53:53           0.0.0.0:*               LISTEN      systemd-resolve 25754      199/systemd-resolve
-tcp        0      0 0.0.0.0:23              0.0.0.0:*               LISTEN      root       21735      213/inetd
-tcp        0      0 127.0.0.1:37227         127.0.0.1:36308         ESTABLISHED hev        6667166    413/node
-tcp        0      0 127.0.0.1:36308         127.0.0.1:37227         ESTABLISHED hev        6679367    62414/node
-tcp        0      0 127.0.0.1:37227         127.0.0.1:40940         ESTABLISHED hev        6666963    522/node
-tcp        0      0 127.0.0.1:40940         127.0.0.1:37227         ESTABLISHED hev        6682094    62080/node
-udp        0      0 127.0.0.54:53           0.0.0.0:*                           systemd-resolve 25755      199/systemd-resolve
-udp        0      0 127.0.0.53:53           0.0.0.0:*                           systemd-resolve 25753      199/systemd-resolve
-udp        0      0 10.255.255.254:53       0.0.0.0:*                           root       20489      -
-udp        0      0 127.0.0.1:323           0.0.0.0:*                           root       19468      -
-`
 )
-
-var mux sync.Mutex
 
 func TestNetstat(t *testing.T) {
 	slog.SetLogLoggerLevel(slog.LevelDebug)
 
 	dataMon = storage.New[Netstat]()
 
-	t.Run("Запускаем parser и готовим данные", func(_ *testing.T) {
-		func() {
-			mux.Lock()
-			defer mux.Unlock()
+	t.Run("Готовим данные и прогоняем parser", func(t *testing.T) {
+		chToParser = make(chan []byte, 10)
 
-			chToParser = make(chan []byte, 10)
-			chToParser <- []byte(netstatInput)
-			close(chToParser)
-			parser()
-			chToParser = make(chan []byte, 10)
-			chToParser <- []byte(netstatInput2)
-			close(chToParser)
-			parser()
-		}()
+		chToParser <- []byte(netstatInput)
+		close(chToParser)
+
+		parser()
+
+		stat, err := GetSum(1)
+		require.Nil(t, err)
+		require.Equal(t, 2, len(stat.Conn))
+		require.Equal(t, 10, len(stat.Socket))
 	})
 }
