@@ -5,8 +5,11 @@ build:
 	@go build -o ./bin/server ./cmd/server
 
 
-run: build
-	@OTUS_MOD_START=cpu,loadavg,netstat ./bin/server -d
+integration:
+	@echo "Start server"
+	@OTUS_MOD_START=cpu,loadavg go run ./cmd/server &
+	@echo "Start test"
+	@go test -v -count=1 ./cmd/client/
 
 proto: 
 	# rm -rf internal/pb

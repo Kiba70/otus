@@ -13,9 +13,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.ref, 'calendar') }}
     steps:
-      - name: Extract branch name
-        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -34,9 +31,6 @@ jobs:
     runs-on: ubuntu-latest
     if: ${{ !contains(github.ref, 'calendar') }}
     steps:
-      - name: Extract branch name
-        run: echo "BRANCH=${GITHUB_REF#refs/heads/}" >> $GITHUB_ENV
-
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
@@ -47,4 +41,8 @@ jobs:
 
       - name: Unit tests
         run: go test -v -count=100 -race -timeout=1m ./internal/...
+        working-directory: /home/runner/work/otus/otus
+
+      - name: Integration test
+        run: make integration
         working-directory: /home/runner/work/otus/otus
