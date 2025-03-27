@@ -1,3 +1,12 @@
+// Статистика по сетевым соединениям:
+//
+// 1. слушающие TCP & UDP сокеты: command, pid, user, protocol, port;
+// 2. количество TCP соединений, находящихся в разных состояниях (ESTAB, FIN_WAIT, SYN_RCV и пр.).
+//
+// Раелизован алгоритм:
+// 1. По данному пункту: Все открытые порты, которые встречались за период М
+// 2. По данному пункту: По каждому статусу соединения сумма значений за период М (не среднее)
+
 package netstat
 
 import (
@@ -5,8 +14,6 @@ import (
 	"errors"
 	"log/slog"
 	"os/exec"
-	"regexp"
-	"strconv"
 	"strings"
 	"sync"
 	"sync/atomic"
@@ -24,8 +31,6 @@ var (
 	dataMon    *storage.Storage[Netstat]
 	Working    atomic.Bool
 	chToParser chan []byte
-	regTCP     = regexp.MustCompile(`tcp.+:(\d+)\s.*:(\*|\d+)\s+([[:graph:]]+)\s+([\w-_@\.]+)\s+\d+\s+([[:graph:]]*).*`)
-	regUDP     = regexp.MustCompile(`udp.+:(\d+)\s.*:(\*|\d+)\s+([\w-_@\.]+)\s+\d+\s+([[:graph:]]*).*`)
 )
 
 type (
@@ -97,8 +102,7 @@ func getData(ctxGlobal context.Context) error {
 	ctx, cancel := context.WithTimeout(ctxGlobal, 300*time.Millisecond)
 	defer cancel()
 
-	cmd := exec.CommandContext(ctx, "netstat", "-apeW", "-A", "inet", "--numeric-hosts", "--numeric-ports")
-	out, err := cmd.Output()
+	out, err := exec.CommandContext(ctx, netstatCommand, netstatARGS...).CombinedOutput()
 	if err != nil {
 		return err
 	}
@@ -108,24 +112,27 @@ func getData(ctxGlobal context.Context) error {
 	return nil
 }
 
+//nolint:gocognit
 func parser() {
 	for out := range chToParser {
-		sockets := make([]Socket, 0, strings.Count(string(out), "\n")+1)
+		sockets := make([]Socket, 0, strings.Count(string(out), lineDelim)+1)
 		conn := make(map[string]int32)
 
-		for _, s := range strings.Split(string(out), "\n") {
+		for s := range strings.SplitSeq(string(out), lineDelim) {
 			if len(s) < 3 {
 				continue
 			}
 
-			switch s[:3] {
-			case "tcp":
+			switch strings.Trim(s[:5], " \t") {
+			case "tcp", "TCP":
 				socket, status, err := parseLineTCP(s)
 				if err != nil {
-					slog.Error("Netstat", "error", err)
+					if !errors.Is(err, errNetV6) {
+						slog.Error("Netstat", "error", err)
+					}
 					continue // Ошибка
 				}
-				if status == "LISTEN" { // Слушаем порт
+				if status[:6] == "LISTEN" { // Слушаем порт
 					socket.Protocol = "tcp"
 					sockets = append(sockets, socket)
 					continue
@@ -133,10 +140,12 @@ func parser() {
 				if status != "" {
 					conn[status]++ // Счётчик
 				}
-			case "udp":
+			case "udp", "UDP":
 				socket, err := parseLineUDP(s)
 				if err != nil {
-					slog.Error("Netstat", "error", err)
+					if !errors.Is(err, errNetV6) {
+						slog.Error("Netstat", "error", err)
+					}
 					continue // Ошибка
 				}
 
@@ -154,70 +163,6 @@ func parser() {
 
 		dataMon.Add(netstat)
 	}
-}
-
-func parseLineTCP(line string) (Socket, string, error) {
-	var sock Socket
-
-	slog.Debug("Netstat", "line", line)
-
-	splitLine := regTCP.FindStringSubmatch(line)
-
-	if len(splitLine) != 6 { // столько должно быть распарсенных элементов
-		return sock, "", errors.New("error in parsing line TCP")
-	}
-	slog.Debug("Netstat", "port", splitLine[1], "status", splitLine[3], "user", splitLine[4], "pid", splitLine[5])
-
-	sock.User = splitLine[4]
-
-	if i32, err := strconv.Atoi(splitLine[1]); err == nil {
-		sock.Port = int32(i32) //nolint:gosec
-	}
-
-	if splitLine[5] != "-" {
-		s2 := strings.Split(splitLine[5], "/")
-		if len(s2) != 2 { // Не в формате
-			return sock, splitLine[3], nil // Значения по умолчанию
-		}
-		if i32, err := strconv.Atoi(s2[0]); err == nil {
-			sock.Pid = int32(i32) //nolint:gosec
-		}
-		sock.Command = s2[1]
-	}
-
-	return sock, splitLine[3], nil
-}
-
-func parseLineUDP(line string) (Socket, error) {
-	var sock Socket
-
-	slog.Debug("Netstat", "line", line)
-
-	splitLine := regUDP.FindStringSubmatch(line)
-
-	if len(splitLine) != 5 { // столько должно быть распарсенных элементов
-		return sock, errors.New("error in parsing line UDP")
-	}
-	slog.Debug("Netstat", "port", splitLine[1], "user", splitLine[3], "pid", splitLine[4])
-
-	sock.User = splitLine[3]
-
-	if i32, err := strconv.Atoi(splitLine[1]); err == nil {
-		sock.Port = int32(i32) //nolint:gosec
-	}
-
-	if splitLine[4] != "-" {
-		s2 := strings.Split(splitLine[4], "/")
-		if len(s2) != 2 { // Не в формате
-			return sock, nil // Значения по умолчанию
-		}
-		if i32, err := strconv.Atoi(s2[0]); err == nil {
-			sock.Pid = int32(i32) //nolint:gosec
-		}
-		sock.Command = s2[1]
-	}
-
-	return sock, nil
 }
 
 func GetSum(m int) (Netstat, error) {

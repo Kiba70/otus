@@ -4,7 +4,7 @@ COPY go.mod go.sum ./
 COPY cmd/server/ ./cmd/server/
 COPY internal/ ./internal/
 RUN go mod download
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o monintor-server ./cmd/server/
+RUN CGO_ENABLED=0 GOOS=linux go build -tags=linux -a -installsuffix cgo -o monintor-server ./cmd/server/
 
 FROM alpine:3.21.3
 ENV PORT=8080
