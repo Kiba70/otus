@@ -69,7 +69,7 @@ linters:
     - exhaustive
     - exportloopref
     - funlen
-    #- gci Странные разнообразно-случайные ошибки в модуле import
+    - gci
     - gocognit
     - goconst
     - gocritic
