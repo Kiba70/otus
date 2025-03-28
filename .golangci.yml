@@ -75,8 +75,8 @@ linters:
     - gocritic
     - gocyclo
     - godot
-    #- gofmt отключено в связи с нестабильной работой - случайные срабатывания в разных местах import
-    - gofumpt
+    - gofmt
+    #- gofumpt отключено в связи с нестабильной работой - случайные срабатывания в разных местах import
     - goheader
     - gomoddirectives
     - gomodguard
