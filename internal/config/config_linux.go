@@ -1,3 +1,5 @@
+//gobuild:linux
+
 package config
 
 const (

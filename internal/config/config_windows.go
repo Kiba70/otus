@@ -1,3 +1,5 @@
+//gobuild:windows
+
 package config
 
 const (
