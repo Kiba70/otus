@@ -10,7 +10,7 @@
 слушающие TCP & UDP сокеты: command, pid, user, protocol, port;
 количество TCP соединений, находящихся в разных состояниях (ESTAB, FIN_WAIT, SYN_RCV и пр.).
 
-Пункты 1 и 3 реализованы только для linux. Пункт 3 реализован для linux и windows.
+Пункты 1 и 2 реализованы только для linux. Пункт 3 реализован для linux и windows.
 
 Интеграционный тест реализован командой make integration
 
