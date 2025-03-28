@@ -25,7 +25,7 @@ jobs:
       - name: Linters
         uses: golangci/golangci-lint-action@v3
         with:
-          version: v2.0.2
+          version: v1.64.8
           working-directory: /home/runner/work/otus/otus
 
   tests:
@@ -61,11 +61,11 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build server
-        run: go build tags=linux -o ./bin/server ./cmd/server
+        run: go build -tags=linux -o ./bin/server ./cmd/server
         working-directory: /home/runner/work/otus/otus
 
       - name: Build client
-        run: go build tags=linux -o ./bin/client ./cmd/client
+        run: go build -tags=linux -o ./bin/client ./cmd/client
         working-directory: /home/runner/work/otus/otus
 
   build-windows:
@@ -81,9 +81,9 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Build server
-        run: go build tags=windows -o ./bin/server.exe ./cmd/server
-        working-directory: /home/runner/work/otus/otus
+        run: go build -tags=windows -o ./bin/server.exe ./cmd/server
+        working-directory: D:\a\otus\otus
 
       - name: Build client
-        run: go build tags=windows -o ./bin/client.exe ./cmd/client
-        working-directory: /home/runner/work/otus/otus
+        run: go build -tags=windows -o ./bin/client.exe ./cmd/client
+        working-directory: D:\a\otus\otus
