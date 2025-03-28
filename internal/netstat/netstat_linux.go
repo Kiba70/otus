@@ -1,4 +1,4 @@
-//gobuild:linux
+//go:build linux
 
 package netstat
 
