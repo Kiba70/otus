@@ -1,103 +1,114 @@
 run:
-   tests: true
-   build-tags:
-     - bench
-     - !bench
- 
- linters-settings:
-   funlen:
-     lines: 150
-     statements: 80
-   depguard:
-     rules:
-       Main:
-         files:
-           - $all
-           - "!$test"
-         allow:
-           - $gostd
-           - otus/internal/config
-           - otus/internal/cpu
-           - otus/internal/loadavg
-           - otus/internal/netstat
-           - otus/internal/process
-           - otus/internal/web
-           - otus/internal/pb
-           - otus/internal/myerr
-           - otus/internal/storage
-           - google.golang.org/grpc
-           - google.golang.org/grpc/credentials/insecure
-       Test:
-         files:
-           - $test
-         allow:
-           - $gostd
-           - github.com/stretchr/testify
-           - otus/internal/config
-           - otus/internal/cpu
-           - otus/internal/loadavg
-           - otus/internal/netstat
-           - otus/internal/process
-           - otus/internal/web
-           - otus/internal/pb
-           - otus/internal/myerr
-           - otus/internal/storage
-           - google.golang.org/grpc
-           - google.golang.org/grpc/credentials/insecure
- 
- issues:
-   exclude-rules:
-     - path: _test\.go
-       linters:
-         - errcheck
-         - dupl
-         - gocyclo
-         - gosec
- 
- linters:
-   disable-all: true
-   enable:
-     - asciicheck
-     - depguard
-     - dogsled
-     - dupl
-     - bodyclose
-     - durationcheck
-     - errorlint
-     - exhaustive
-     - copyloopvar
-     - funlen
-     #- gci отключено в связи с нестабильной работой - случайные срабатывания в разных местах
-     - gocognit
-     - goconst
-     - gocritic
-     - gocyclo
-     - godot
-     - gofmt
-     # - gofumpt отключено в связи с нестабильной работой - случайные срабатывания в разных местах
-     - goheader
-     - goprintffuncname
-     - gosec
-     - gosimple
-     - govet
-     - importas
-     - ineffassign
-     - lll
-     - makezero
-     - misspell
-     - nestif
-     - nilerr
-     - noctx
-     - nolintlint
-     - prealloc
-     - predeclared
-     - revive
-     - staticcheck
-     - stylecheck
-     - tagliatelle
-     - thelper
-     - typecheck
-     - unconvert
-     - unparam
-     - unused
-     - whitespace
+  tests: true
+  build-tags:
+    - bench
+    - !bench
+
+linters-settings:
+  funlen:
+    lines: 150
+    statements: 80
+  depguard:
+    rules:
+      Main:
+        files:
+          - $all
+          - "!$test"
+        allow:
+          - $gostd
+          - otus/internal/config
+          - otus/internal/cpu
+          - otus/internal/loadavg
+          - otus/internal/netstat
+          - otus/internal/process
+          - otus/internal/web
+          - otus/internal/pb
+          - otus/internal/myerr
+          - otus/internal/storage
+          - google.golang.org/grpc
+          - google.golang.org/grpc/credentials/insecure
+      Test:
+        files:
+          - $test
+        allow:
+          - $gostd
+          - github.com/stretchr/testify
+          - otus/internal/config
+          - otus/internal/cpu
+          - otus/internal/loadavg
+          - otus/internal/netstat
+          - otus/internal/process
+          - otus/internal/web
+          - otus/internal/pb
+          - otus/internal/myerr
+          - otus/internal/storage
+          - google.golang.org/grpc
+          - google.golang.org/grpc/credentials/insecure
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - dupl
+        - gocyclo
+        - gosec
+
+linters:
+  disable-all: true
+  enable:
+    - asciicheck
+    - bodyclose
+    - deadcode
+    - depguard
+    - dogsled
+    - dupl
+    - bodyclose
+    - durationcheck
+    - errorlint
+    - exhaustive
+    - exportloopref
+    - funlen
+    #- gci
+    - gocognit
+    - goconst
+    - gocritic
+    - gocyclo
+    - godot
+    - gofmt
+    #- gofumpt
+    - goheader
+    - gomoddirectives
+    - gomodguard
+    - goprintffuncname
+    - gosec
+    - gosimple
+    - govet
+    - ifshort
+    - importas
+    - ineffassign
+    - lll
+    - makezero
+    - misspell
+    - nestif
+    - nilerr
+    - noctx
+    - nolintlint
+    - prealloc
+    - predeclared
+    - revive
+    - rowserrcheck
+    - sqlclosecheck
+    - staticcheck
+    - structcheck
+    - stylecheck
+    - tagliatelle
+    - thelper
+    - tparallel
+    - typecheck
+    - unconvert
+    - unparam
+    - unused
+    - varcheck
+    - wastedassign
+    - whitespace
