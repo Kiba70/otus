@@ -118,7 +118,7 @@ func parser() {
 		sockets := make([]Socket, 0, strings.Count(string(out), lineDelim)+1)
 		conn := make(map[string]int32)
 
-		for _, s := range strings.Split(string(out), lineDelim) {
+		for s := range strings.SplitSeq(string(out), lineDelim) {
 			if len(s) < 3 {
 				continue
 			}

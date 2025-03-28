@@ -28,7 +28,7 @@ func Start() map[string]struct{} {
 
 	modules := make(map[string]struct{})
 
-	for _, s := range strings.Split(modulesEnv, ",") {
+	for s := range strings.SplitSeq(modulesEnv, ",") {
 		if strings.Contains(allModules, s) { // Проверяем на корректность
 			modules[s] = struct{}{}
 		}
