@@ -58,6 +58,8 @@ linters:
   disable-all: true
   enable:
     - asciicheck
+    - bodyclose
+    - deadcode
     - depguard
     - dogsled
     - dupl
@@ -65,23 +67,24 @@ linters:
     - durationcheck
     - errorlint
     - exhaustive
-    - copyloopvar
+    - exportloopref
     - funlen
-    #- gci
-    #- gci отключено в связи с нестабильной работой - случайные срабатывания в разных местах import
+    - gci
     - gocognit
     - goconst
     - gocritic
     - gocyclo
     - godot
     - gofmt
-    #- gofumpt
-    # - gofumpt отключено в связи с нестабильной работой - случайные срабатывания в разных местах import
+    - gofumpt
     - goheader
+    - gomoddirectives
+    - gomodguard
     - goprintffuncname
     - gosec
     - gosimple
     - govet
+    - ifshort
     - importas
     - ineffassign
     - lll
@@ -94,12 +97,19 @@ linters:
     - prealloc
     - predeclared
     - revive
+    - rowserrcheck
+    - sqlclosecheck
     - staticcheck
+    - structcheck
     - stylecheck
     - tagliatelle
     - thelper
+    - tparallel
     - typecheck
     - unconvert
     - unparam
     - unused
+    - varcheck
+    - wastedassign
     - whitespace
+    
