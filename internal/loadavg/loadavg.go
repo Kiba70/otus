@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"log/slog"
 	"math"
-	"os"
+	"os" //nolint:gofumpt
 	"sync"
 	"sync/atomic"
 	"time"

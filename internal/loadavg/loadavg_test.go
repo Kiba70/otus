@@ -7,7 +7,7 @@ import (
 	"testing"
 	"time"
 
-	"otus/internal/storage"
+	"otus/internal/storage" //nolint:gci
 
 	"github.com/stretchr/testify/require"
 )

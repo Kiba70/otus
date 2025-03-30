@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"log/slog"
+	"log/slog" //nolint:gofumpt
 	"testing"
 	"time"
 
-	"otus/internal/pb"
+	"otus/internal/pb" //nolint:gci
 
 	"github.com/stretchr/testify/require"
 	"google.golang.org/grpc"

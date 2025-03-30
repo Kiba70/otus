@@ -13,6 +13,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+//nolint:gofumpt
 var textStat = []string{`cpu  242534 0 395510 44332628 107824 0 49626 0 0 0
 cpu0 13860 0 35046 2751637 9042 0 33421 0 0 0
 cpu1 11191 0 14954 2778885 14017 0 7652 0 0 0`,

@@ -1,6 +1,6 @@
 package main
 
-//nolint:gofumpt,gci
+//nolint:gofumpt,gci,nolintlint
 import (
 	"log/slog"
 	"sync" //nolint:gofumpt
