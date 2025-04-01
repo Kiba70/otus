@@ -5,12 +5,12 @@ import (
 	"log/slog"
 	"sync" //nolint:gofumpt
 
-	"otus/internal/config"
-	"otus/internal/cpu"
-	"otus/internal/loadavg"
-	"otus/internal/netstat"
-	"otus/internal/process"
-	"otus/internal/web" //nolint:gofumpt,nolintlint
+	"github.com/Kiba70/otus/internal/config"
+	"github.com/Kiba70/otus/internal/cpu"
+	"github.com/Kiba70/otus/internal/loadavg"
+	"github.com/Kiba70/otus/internal/netstat"
+	"github.com/Kiba70/otus/internal/process"
+	"github.com/Kiba70/otus/internal/web" //nolint:gofumpt,nolintlint
 )
 
 func main() {

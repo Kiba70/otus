@@ -11,8 +11,8 @@ import (
 	"log/slog"
 	"strings"
 
-	"otus/internal/pb" //nolint:gci
-	"otus/internal/process"
+	"github.com/Kiba70/otus/internal/pb" //nolint:gci
+	"github.com/Kiba70/otus/internal/process"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"

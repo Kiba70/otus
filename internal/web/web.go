@@ -10,13 +10,13 @@ import (
 	"sync"
 	"time"
 
-	"otus/internal/config"
-	"otus/internal/cpu"
-	"otus/internal/loadavg"
-	"otus/internal/myerr"
-	"otus/internal/netstat"
-	"otus/internal/pb"
-	"otus/internal/process"
+	"github.com/Kiba70/otus/internal/config"
+	"github.com/Kiba70/otus/internal/cpu"
+	"github.com/Kiba70/otus/internal/loadavg"
+	"github.com/Kiba70/otus/internal/myerr"
+	"github.com/Kiba70/otus/internal/netstat"
+	"github.com/Kiba70/otus/internal/pb"
+	"github.com/Kiba70/otus/internal/process"
 
 	"google.golang.org/grpc"
 )

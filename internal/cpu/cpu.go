@@ -11,8 +11,8 @@ import (
 	"sync/atomic"
 	"time"
 
-	"otus/internal/myerr"
-	"otus/internal/storage"
+	"github.com/Kiba70/otus/internal/myerr"
+	"github.com/Kiba70/otus/internal/storage"
 )
 
 const (

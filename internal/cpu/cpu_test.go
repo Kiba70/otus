@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"otus/internal/storage"
+	"github.com/Kiba70/otus/internal/storage"
 
 	"github.com/stretchr/testify/require"
 )
