@@ -8,7 +8,6 @@ import (
 	"time"
 
 	"github.com/Kiba70/otus/internal/storage"
-
 	"github.com/stretchr/testify/require"
 )
 

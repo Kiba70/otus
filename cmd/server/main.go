@@ -1,16 +1,15 @@
 package main
 
-//nolint:gofumpt,gci
 import (
 	"log/slog"
-	"sync" //nolint:gofumpt
+	"sync"
 
 	"github.com/Kiba70/otus/internal/config"
 	"github.com/Kiba70/otus/internal/cpu"
 	"github.com/Kiba70/otus/internal/loadavg"
 	"github.com/Kiba70/otus/internal/netstat"
 	"github.com/Kiba70/otus/internal/process"
-	"github.com/Kiba70/otus/internal/web" //nolint:gofumpt,nolintlint
+	"github.com/Kiba70/otus/internal/web"
 )
 
 func main() {

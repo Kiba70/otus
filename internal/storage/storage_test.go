@@ -5,8 +5,7 @@ package storage_test
 import (
 	"testing"
 
-	"github.com/Kiba70/otus/internal/storage" //nolint:gci
-
+	"github.com/Kiba70/otus/internal/storage"
 	"github.com/stretchr/testify/require"
 )
 

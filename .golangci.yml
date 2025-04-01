@@ -16,15 +16,15 @@ linters-settings:
           - "!$test"
         allow:
           - $gostd
-          - otus/internal/config
-          - otus/internal/cpu
-          - otus/internal/loadavg
-          - otus/internal/netstat
-          - otus/internal/process
-          - otus/internal/web
-          - otus/internal/pb
-          - otus/internal/myerr
-          - otus/internal/storage
+          - github.com/Kiba70/otus/internal/config
+          - github.com/Kiba70/otus/internal/cpu
+          - github.com/Kiba70/otus/internal/loadavg
+          - github.com/Kiba70/otus/internal/netstat
+          - github.com/Kiba70/otus/internal/process
+          - github.com/Kiba70/otus/internal/web
+          - github.com/Kiba70/otus/internal/pb
+          - github.com/Kiba70/otus/internal/myerr
+          - github.com/Kiba70/otus/internal/storage
           - google.golang.org/grpc
           - google.golang.org/grpc/credentials/insecure
       Test:
@@ -33,15 +33,15 @@ linters-settings:
         allow:
           - $gostd
           - github.com/stretchr/testify
-          - otus/internal/config
-          - otus/internal/cpu
-          - otus/internal/loadavg
-          - otus/internal/netstat
-          - otus/internal/process
-          - otus/internal/web
-          - otus/internal/pb
-          - otus/internal/myerr
-          - otus/internal/storage
+          - github.com/Kiba70/otus/internal/config
+          - github.com/Kiba70/otus/internal/cpu
+          - github.com/Kiba70/otus/internal/loadavg
+          - github.com/Kiba70/otus/internal/netstat
+          - github.com/Kiba70/otus/internal/process
+          - github.com/Kiba70/otus/internal/web
+          - github.com/Kiba70/otus/internal/pb
+          - github.com/Kiba70/otus/internal/myerr
+          - github.com/Kiba70/otus/internal/storage
           - google.golang.org/grpc
           - google.golang.org/grpc/credentials/insecure
 

@@ -1,6 +1,5 @@
 package web
 
-//nolint:gofumpt,gci
 import (
 	"context"
 	"errors"
@@ -17,13 +16,10 @@ import (
 	"github.com/Kiba70/otus/internal/netstat"
 	"github.com/Kiba70/otus/internal/pb"
 	"github.com/Kiba70/otus/internal/process"
-
 	"google.golang.org/grpc"
 )
 
-var (
-	ctxW context.Context
-)
+var ctxW context.Context
 
 type server struct {
 	pb.UnimplementedMonitoringServer
