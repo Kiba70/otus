@@ -1,6 +1,5 @@
 package cpu
 
-//nolint:gofumpt,gci,nolintlint
 import (
 	"bufio"
 	"context"

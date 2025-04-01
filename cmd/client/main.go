@@ -1,6 +1,5 @@
 package main
 
-//nolint:gofumpt,gci,nolintlint
 import (
 	"context"
 	"errors"
@@ -11,7 +10,7 @@ import (
 	"log/slog"
 	"strings"
 
-	"github.com/Kiba70/otus/internal/pb" //nolint:gci
+	"github.com/Kiba70/otus/internal/pb"
 	"github.com/Kiba70/otus/internal/process"
 
 	"google.golang.org/grpc"
