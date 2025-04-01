@@ -1,4 +1,4 @@
-module otus
+module github.com/Kiba70/otus
 
 go 1.24.1
 
